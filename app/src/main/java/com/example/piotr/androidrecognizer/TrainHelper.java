@@ -53,6 +53,7 @@ public class TrainHelper {
 
     public static void reset(Context context) throws Exception {
         File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
+        Log.d("Piopr", photosFolder.toString());
         if (photosFolder.exists()) {
 
             FilenameFilter imageFilter = new FilenameFilter() {
@@ -63,6 +64,9 @@ public class TrainHelper {
             };
 
             File[] files = photosFolder.listFiles(imageFilter);
+            for(File file : files){
+                //Log.d("Piopr", file.toString());
+            }
             for (File file : files) {
                 file.delete();
             }

@@ -15,6 +15,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Recognize with OpenCv" />
+        android:text="Recognize with OpenCv godz.00:01" />
 
 </LinearLayout>
