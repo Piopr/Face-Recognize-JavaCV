@@ -1,4 +1,4 @@
-package org.bytedeco.javacv.android.recognize.example;
+package com.example.piotr.androidrecognizer;
 
 import android.Manifest;
 import android.app.AlertDialog;
