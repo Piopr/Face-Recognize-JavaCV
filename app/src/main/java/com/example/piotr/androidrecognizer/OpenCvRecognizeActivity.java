@@ -30,7 +30,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.putText;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
-import static org.bytedeco.javacv.android.recognize.example.TrainHelper.ACCEPT_LEVEL;
+import static com.example.piotr.androidrecognizer.TrainHelper.ACCEPT_LEVEL;
 
 /**
  * Created by djalmaafilho.
