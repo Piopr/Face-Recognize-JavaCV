@@ -78,7 +78,8 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                 try {
                     faceDetector = TrainHelper.loadClassifierCascade(OpenCvRecognizeActivity.this, R.raw.frontalface);
                     if(TrainHelper.isTrained(getBaseContext())) {
-                        File folder = new File(getFilesDir(), TrainHelper.TRAIN_FOLDER);
+                        //File folder = new File(getFilesDir(), TrainHelper.TRAIN_FOLDER);
+                        File folder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
                         File f = new File(folder, TrainHelper.EIGEN_FACES_CLASSIFIER);
 //                        faceRecognizer.load(f.getAbsolutePath());
                         faceRecognizer.read(f.getAbsolutePath());

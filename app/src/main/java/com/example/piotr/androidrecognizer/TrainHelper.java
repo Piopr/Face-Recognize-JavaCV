@@ -52,7 +52,9 @@ public class TrainHelper {
 
 
     public static void reset(Context context) throws Exception {
-        File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
+        //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
+        File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
+
         Log.d("Piopr", photosFolder.toString());
         if (photosFolder.exists()) {
 
@@ -76,7 +78,8 @@ public class TrainHelper {
 
     public static boolean isTrained(Context context) {
         try {
-            File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
+            //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
+            File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
             if (photosFolder.exists()) {
 
                 FilenameFilter imageFilter = new FilenameFilter() {
@@ -107,7 +110,8 @@ public class TrainHelper {
     }
 
     public static int qtdPhotos(Context context) {
-        File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
+        //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
+        File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
         if (photosFolder.exists()) {
             FilenameFilter imageFilter = new FilenameFilter() {
                 @Override
@@ -124,7 +128,8 @@ public class TrainHelper {
 
     public static boolean train(Context context) throws Exception {
 
-        File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
+        //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
+        File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
         if (!photosFolder.exists()) return false;
 
         FilenameFilter imageFilter = new FilenameFilter() {
@@ -174,7 +179,9 @@ public class TrainHelper {
     }
 
     public static void takePhoto(Context context, int personId, int photoNumber, Mat rgbaMat, opencv_objdetect.CascadeClassifier faceDetector) throws Exception {
-        File folder = new File(context.getFilesDir(), TRAIN_FOLDER);
+        //File folder = new File(context.getFilesDir(), TRAIN_FOLDER);
+        File folder = new File("/mnt/sdcard/", TRAIN_FOLDER);
+        Log.d("Piopr", folder.toString());
         if (folder.exists() && !folder.isDirectory())
             folder.delete();
         if (!folder.exists())
