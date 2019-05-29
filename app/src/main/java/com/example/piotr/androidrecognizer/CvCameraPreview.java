@@ -60,11 +60,17 @@ import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_NV21;
  */
 public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callback, PreviewCallback {
 
+    /**
+     * LOG_TAG - nazwa tagu do logowania
+     */
     private final String LOG_TAG = "CvCameraPreview";
 
     private static final int STOPPED = 0;
     private static final int STARTED = 1;
 
+    /**
+     * id wybranej kamery
+     */
     public static final int CAMERA_BACK = 99;
     public static final int CAMERA_FRONT = 98;
 
@@ -77,6 +83,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      * ASPECT_RATIO_W and ASPECT_RATIO_H define the aspect ratio
      * of the Surface. They are used when {@link #onMeasure(int, int)}
      * is called.
+     * Wspolczynniki proporcji, 4:3
      */
     private final float ASPECT_RATIO_W = 4.0f;
     private final float ASPECT_RATIO_H = 3.0f;

@@ -17,36 +17,37 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    private boolean mPermissionReady;
+    private boolean mPermissionReady; //zmienna do kontroli nadanych uprawnien
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         Log.d("Piopr", "dzialaj no");
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main); //ustawienie widoku
+        //obsluga klikniecia
         findViewById(R.id.btnOpenCv).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mPermissionReady) {
-                    startActivity(new Intent(MainActivity.this, OpenCvRecognizeActivity.class));
+                if (mPermissionReady) { //warunek, czy nadano uprawnienia
+                    startActivity(new Intent(MainActivity.this, OpenCvRecognizeActivity.class)); //zmiana widoku
                 }
             }
         });
 
-        int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        int storagePermssion = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA); //jesli nadano: 0, jesli nie: -1
+        int storagePermssion = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);//jesli nadano: 0, jesli nie: -1
         mPermissionReady = cameraPermission == PackageManager.PERMISSION_GRANTED
-                && storagePermssion == PackageManager.PERMISSION_GRANTED;
+                && storagePermssion == PackageManager.PERMISSION_GRANTED; //gdy oba uprawnienia nadane, wartosc mPermissionReady: true
         if (!mPermissionReady)
-            requirePermissions();
+            requirePermissions(); //jesli nie nadano uprawnien, prosba o nadanie
     }
 
     private void requirePermissions() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE}, 11);
+                Manifest.permission.WRITE_EXTERNAL_STORAGE}, 11); //zapytanie o uprawnienia, request code
     }
-
+    //komunikat o nadaniu uprawnien
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         Map<String, Integer> perm = new HashMap<>();
         perm.put(Manifest.permission.CAMERA, PackageManager.PERMISSION_DENIED);
