@@ -98,6 +98,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
     private final int PREVIEW_MAX_WIDTH = 640;
 
     /**
+     * rozdzielczosc zdjecia zrobionego przez kamere
      * The maximum dimension (in pixels) of the images produced when a
      * {@link PictureCallback#onPictureTaken(byte[], Camera)} event is
      * fired. Again, this is a maximum value and could not be the
@@ -106,6 +107,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
     private final int PICTURE_MAX_WIDTH = 1280;
 
     /**
+     * bufor podglądu na którym dokonujemy obliczeń lub transformacji
      * In this example we look at camera preview buffer functionality too.<br />
      * This is the array that will be filled everytime a single preview frame is
      * ready to be processed (for example when we want to show to the user
@@ -115,34 +117,95 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
     private byte[] previewBuffer;
 
     /**
+     * //uchwyt pozwalający na modyfikację aktualnie wyświetlanego podglądu
      * The "holder" is the underlying surface.
      */
     private SurfaceHolder surfaceHolder;
-
+    /**
+     * narzędzie służące do filtrowania ramek
+     */
     private FFmpegFrameFilter filter;
+    /**
+     * id łańcucha ???
+     */
     private int chainIdx = 0;
+    /**
+     * mutexy (zmienne do wstrzymywania wątków)
+     */
     private boolean stopThread = false;
     private boolean cameraFrameReady = false;
     protected boolean enabled = true;
     private boolean surfaceExist;
+    /**
+     * zmienna wątku
+     */
     private Thread thread;
+    /**I
+     * interfejs obsługi zmiany podglądu i dostarczania ramek
+     */
     private CvCameraViewListener listener;
+    /**
+     * klasa konwersji obiektów klasy Frame do Bitmapy
+     */
     private AndroidFrameConverter converterToBitmap = new AndroidFrameConverter();
+    /**
+     * konwerjsa bitmapy do obiektu typu Mat (obliczenia w Java wykonywane właśnie na tej klasie).
+     */
     private OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
+    /**
+     * pamięć podręczna bitmapy
+     */
     private Bitmap cacheBitmap;
+    /**
+     * tablica ramek
+     */
     protected Frame[] cameraFrame;
+    /**
+     * stan.
+     * TODO: do czego się odwołuje
+     */
     private int state = STOPPED;
+    /**
+     * obiekt do współbieżności
+     */
     private final Object syncObject = new Object();
+    /**
+     * zmienna id kamery (wybór pomiędzy dostępnymi kamerami)
+     */
     private int cameraId = -1;
+    /**
+     * pobieranie id tylnej kamery
+     */
     private int cameraType = Camera.CameraInfo.CAMERA_FACING_BACK;
+    /**
+     * klasa służy do sterowania kamerą (ustawienia podglądu, zatrzymywanie, wyświetlanie)
+     */
     private Camera cameraDevice;
+    /**
+     * przechowuje ramki ze strumienia obrazu jako tekst ES OpenGL (pochodzi z kamery lub z wideo)
+     * updateTexImage () - aktualizuje na najnowszą klatkę ze źródła obrazu
+     */
     private SurfaceTexture surfaceTexture;
+    /**
+     * rozmiary klatek
+     */
     private int frameWidth, frameHeight;
+    /**
+     * skalowanie do aktualnego widoku (dopasowanie)
+     */
     private int scaleType = SCALE_FIT;
 
+    /**
+     * dziedziczyz SurfaceView
+     * @param context - aktualny widok
+     * @param attrs - atrybuty (pobierane z opencv.xml)
+     */
     public CvCameraPreview(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        /**
+         * pobieranie wartości z pliku /values/attrs.xml
+         */
         TypedArray array = getContext().obtainStyledAttributes(attrs, R.styleable.CvCameraPreview);
         int camType = array.getInt(R.styleable.CvCameraPreview_camera_type, CAMERA_BACK);
         int scaleType = array.getInt(R.styleable.CvCameraPreview_scale_type, SCALE_FIT);
@@ -172,10 +235,18 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         }
     }
 
+    /**
+     * listener zmiany podglądu i dostarczania ramek
+     * @param listener - zmiana listenera
+     */
     public void setCvCameraViewListener(CvCameraViewListener listener) {
         this.listener = listener;
     }
 
+    /**
+     *
+     * @return - id uzywanej kamery
+     */
     public int getCameraId() {
         return cameraId;
     }
@@ -262,6 +333,9 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         Log.d(LOG_TAG, "call processEnterState: " + state);
         switch (state) {
             case STARTED:
+                /**
+                 * sprawdzenie, czy kamera moze byc uzywana. Jesli nie, przerywa aplikacje
+                 */
                 onEnterStartedState();
                 if (listener != null) {
                     listener.onCameraViewStarted(frameWidth, frameHeight);
@@ -311,6 +385,9 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         }
         if (filter != null) {
             try {
+                /**
+                 * zamyka aktualny plik wideo lub urządzenie
+                 */
                 filter.release();
             } catch (FrameFilter.Exception e) {
                 e.printStackTrace();
@@ -318,6 +395,10 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         }
     }
 
+    /**
+     * obsluga zamkniecia powierzchni surfaceHolder
+     * @param holder
+     */
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.d(LOG_TAG, "surfaceDestroyed");
@@ -345,6 +426,9 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         int width = MeasureSpec.getSize(widthMeasureSpec);
 
         // do some ultra high precision math...
+        /**
+         * obliczenie dokładnej proporcji w celu uniknięcia błęów
+         */
         float expectedRatio = height > width ? ASPECT_RATIO_H / ASPECT_RATIO_W : ASPECT_RATIO_W / ASPECT_RATIO_H;
         float screenRatio = width * 1f / height;
         if (screenRatio > expectedRatio) {
@@ -855,14 +939,16 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         public void onCameraViewStarted(int width, int height);
 
         /**
+         * metoda jest wywoływana, gdy podgląd kamery został przerwany
          * This method is invoked when camera preview has been stopped for some reason.
          * No frames will be delivered via onCameraFrame() callback after this method is called.
          */
         public void onCameraViewStopped();
 
         /**
+         * wywoływana, gdy potrzebne dostarczenie ramki. Zwraca zmodyfikowaną ramkę
          * This method is invoked when delivery of the frame needs to be done.
-         * The returned values - is a modified frame which needs to be displayed on the screen.
+         * @return The returned values - is a modified frame which needs to be displayed on the screen.
          * TODO: pass the parameters specifying the format of the frame (BPP, YUV or RGB and etc)
          */
         public Mat onCameraFrame(Mat mat);
