@@ -39,23 +39,49 @@ import static org.bytedeco.javacpp.opencv_imgproc.resize;
  */
 public class TrainHelper {
 
+    /**
+     * tag logowania
+     */
     public static final String TAG = "TrainHelper";
+    /**
+     * nazwa folderu przechowujacego zdjecia oraz pliki .yml
+     */
     public static final String TRAIN_FOLDER = "train_folder";
+    /**
+     * rozmiar, do którego skalowana będzie twarz (160px x 160px)
+     */
     public static final int IMG_SIZE = 160;
-
+    /**
+     * nazwy klasyfikatorów dla każdego z algorytmów
+     */
     public static final String EIGEN_FACES_CLASSIFIER = "eigenFacesClassifier.yml";
     public static final String FISHER_FACES_CLASSIFIER = "fisherFacesClassifier.yml";
     public static final String LBPH_CLASSIFIER = "lbphClassifier.yml";
+    /**
+     * patern dla zapisywanyh zdjęć zrobionych aparatem
+     */
     public static final String FILE_NAME_PATTERN = "person.%d.%d.jpg";
+    /**
+     * ilosc zdjec wymaganch do trenowania
+     */
     public static final int PHOTOS_TRAIN_QTY = 25;
+    /**
+     * współczynnik po którym aplikacja stwierdza, że porównywana twarz jest znajoma
+     * poniżej 4000 - rozpoznanie
+     * poniżej 4000 - unknown
+     */
     public static final double ACCEPT_LEVEL = 4000.0D;
 
-
+    /**
+     * obsługa przycisku reset (usunięcie wszystkich zdjęć w folderze treningu)
+     * @param context
+     * @throws Exception
+     */
     public static void reset(Context context) throws Exception {
         //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
         File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
 
-        Log.d("Piopr", photosFolder.toString());
+        Log.d("Piopr " + TAG, photosFolder.toString());
         if (photosFolder.exists()) {
 
             FilenameFilter imageFilter = new FilenameFilter() {
@@ -75,7 +101,11 @@ public class TrainHelper {
         }
     }
 
-
+    /**
+     * sprawdzenie, czy już trenowano algorytm
+     * @param context
+     * @return
+     */
     public static boolean isTrained(Context context) {
         try {
             //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
@@ -109,6 +139,11 @@ public class TrainHelper {
         return false;
     }
 
+    /**
+     * Służy oliczenie ilość plików zdjęciowych znajdujących się w folderrze treningu
+     * @param context - aktualny widok
+     * @return - ilosc zdjęć
+     */
     public static int qtdPhotos(Context context) {
         //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
         File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
@@ -125,7 +160,29 @@ public class TrainHelper {
         }
         return 0;
     }
-
+    /**
+     * Klasa służąca do treningu.
+     * Na początku sprawdza, czy istnieje folder ze zdjęciami do trenowania. Jeśli nie - zwraca false.</br>
+     * Nastepnie w zmiennej Files[] files tworzy listę zdjęć.</br>
+     * Tworzy wskaźnik na zdjęcia typu MatVector photos o rozmiarze równym ilości plików do trenowania.</br>
+     * Tworzy zbiór etykiet labels (Mat labels). Ilość wierszy: ilość plików. Ilość kolumn: 1, typu 32-bitowych shortów z jednym kanałem</br>
+     * rotulosBuffer nie wiem do czego jest potrzebny.</br>
+     * Przechodzi po liśie plików files</br>
+     * Zapisuje w timczasowej Mat photo aktualne zdjęcie w grayscale</br>
+     * classe to numer identyfikacyjny wyciągany z nazwy zdjęcia</br>
+     * przeskalowuje obraz (wejsciowym jest kwadratowa twarz o nieznanych rozmiarach) na rozmiar IMG_SIZE px x IMG_SIZE px</br>
+     * taki obraz umieszczany jest w liście MatVector photos</br></br>
+     *
+     * Tworzone są obiekty klas dla algorytmów rozpoznawania np:</br> <b>FaceRecognizer eigenfaces = opencv_face.EigenFaceRecognizer.create();</b>
+     *
+     * następnie odbywa się trening: <b>eigenfaces.train(photos, labels);</b>.
+     * photos to MatVector ze zdjęciami twarzy 160px x 160px
+     * labels to Mat rozmiarem odpowiadajcy ilosci trenowanych zdjęć
+     *
+     * wynik treningu zapisywany jest metodą <b>eigenfaces.save(f.getAbsolutePath());</b> to pliku zdefoniowanego stałą *_FACES_CLASIFIER
+     * @param context
+     * @return zwraca bool. Prawda, gdy istnieją obrazy do trenowania i wykonano trening, false, gdy zdjęcia nie istnieją
+     */
     public static boolean train(Context context) throws Exception {
 
         //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
@@ -208,7 +265,9 @@ public class TrainHelper {
         }
     }
 
-
+    /**
+     * załadowanie kaskady do detekcji twarzy, bez znaczenia dla pracy
+     */
     public static opencv_objdetect.CascadeClassifier loadClassifierCascade(Context context, int resId) {
         FileOutputStream fos = null;
         InputStream inputStream;
