@@ -8,6 +8,7 @@ package com.example.piotr.androidrecognizer;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -235,6 +236,32 @@ public class TrainHelper {
         return true;
     }
 
+    /**
+     * zapis zdjęcia
+     *
+     * Na początku kontrola, czy istnieje folder. Jeśli nie - tworzy go
+     * Stworzenie kopii zdjęcia w zmiennej greyMat klasy Mat. Przekształcenie na greyscale
+     * Stworzenie wektora o 4 współrzędnych (współrzędne tworzonego kwadratu podczas detekcji twarzy), zmienna detectedFaces.
+     *
+     *zdjęcie zapisuje się w formacie: person.personId.photonumber.jpg
+     *
+     * użycie metody detectMultiScale() na obiekcie faceDetector:
+     *  detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
+     *      greyMat - zdjęcie z którygo chcemy wykryć twarz
+     *      detectedFaces - obiekt, do którego zapisujemy współrzędne, w których została wykryta twarz na zdjęciu
+     *      1.1 - współczynnik, który określa o ile wielkośc obrazu zostanie zmniejszona
+     *      1 - Parametr określający, ilu sąsiadów każdy kandydujący prostokąt powinien zachować.
+     *      0 - używane w starszych wersjach cascadeClassifier
+     *      150, 150 - minimalny rozmiar w pikselach fragmentu zdjęcia, na którym znajduje się twarz
+     *      500, 500 - maksymalny rozmiar na zdjęciu, na którym może znaleźć się twarz
+     *
+     * @param context - aktualny widok
+     * @param personId - id osoby - dodawane do nazwy pliku
+     * @param photoNumber - numer zrobionego zdjęcia, dodawane do nazwy pliku
+     * @param rgbaMat - oryginalny obrazek, przechwycony z cameraactivity
+     * @param faceDetector - obiekt CascadeClassifier z pliku frontalface.xml
+     * @throws Exception
+     */
     public static void takePhoto(Context context, int personId, int photoNumber, Mat rgbaMat, opencv_objdetect.CascadeClassifier faceDetector) throws Exception {
         //File folder = new File(context.getFilesDir(), TRAIN_FOLDER);
         File folder = new File("/mnt/sdcard/", TRAIN_FOLDER);
@@ -251,9 +278,17 @@ public class TrainHelper {
         opencv_core.RectVector detectedFaces = new opencv_core.RectVector();
         faceDetector.detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
         for (int i = 0; i < detectedFaces.size(); i++) {
+            Log.d("Piopr", "Wykonanie petli nr das das :  " +1);
+            Log.d("Piopr", "detectedFaces :  " + detectedFaces.get(0));
+
+
 
             opencv_core.Rect rectFace = detectedFaces.get(0);
+            Log.d("Piopr", "rectFace :  " + rectFace.get());
             rectangle(rgbaMat, rectFace, new opencv_core.Scalar(0, 0, 255, 0));
+
+
+
             Mat capturedFace = new Mat(greyMat, rectFace);
             resize(capturedFace, capturedFace, new Size(IMG_SIZE, IMG_SIZE));
 

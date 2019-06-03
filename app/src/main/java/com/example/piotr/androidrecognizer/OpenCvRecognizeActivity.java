@@ -126,6 +126,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         int remainigPhotos = TrainHelper.PHOTOS_TRAIN_QTY - TrainHelper.qtdPhotos(getBaseContext());
         if(remainigPhotos > 0) {
             Toast.makeText(getBaseContext(), "You need more to call train: "+ remainigPhotos, Toast.LENGTH_SHORT).show();
+            Log.d("Piopr", "Test do cholery");
             return;
         }else if(TrainHelper.isTrained(getBaseContext())) {
             Toast.makeText(getBaseContext(), "Already trained", Toast.LENGTH_SHORT).show();
