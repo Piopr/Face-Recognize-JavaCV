@@ -257,6 +257,10 @@ public class TrainHelper {
      *      150, 150 - minimalny rozmiar w pikselach fragmentu zdjęcia, na którym znajduje się twarz
      *      500, 500 - maksymalny rozmiar na zdjęciu, na którym może znaleźć się twarz
      *
+     *wykonuje się pętla przechodząca po wszystkich wykrytych tawrzach (zwykle, i poprawnie po jednej),
+     * w tej pętli wszystkie wykryte twarze nadpisywane są do wcześniej stworzonego pliku .jpg w skali szarości i rozmiarze określonym
+     * w zmiennej IMG_SIZE
+     *
      * @param context - aktualny widok
      * @param personId - id osoby - dodawane do nazwy pliku
      * @param photoNumber - numer zrobionego zdjęcia, dodawane do nazwy pliku
