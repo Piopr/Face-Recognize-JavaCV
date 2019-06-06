@@ -37,13 +37,34 @@ import static com.example.piotr.androidrecognizer.TrainHelper.ACCEPT_LEVEL;
  */
 public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview.CvCameraViewListener {
     public static final String TAG = "OpenCvRecognizeActivity";
-
+    /**
+     * zmienna CascadeClassifiera, czyli wzorca do detekcji twarzy
+     */
     private CascadeClassifier faceDetector;
+    /**
+     * Komunikat pojawiający się podczas wykrycia twarzy
+     */
     private String[] nomes = {"", "Y Know You"};
+    /**
+     * minimalny rozmiar twarzy na activity kamery. Minimalna wartość, to 1/3 szerokości activity.
+     */
     private int absoluteFaceSize = 0;
+    /**
+     * obiekt do sterowania kamerą
+     */
     private CvCameraPreview cameraView;
+    /**
+     * gdy zdjęcie jest wykonywane - true
+     * gdy nie jest lub zakońcono zmieniana na - false
+     */
     boolean takePhoto;
+    /**
+     * obiekt do rozpoznawania twarzy
+     */
     opencv_face.FaceRecognizer faceRecognizer = opencv_face.EigenFaceRecognizer.create();
+    /**
+     * jesli już nauczono twarzy (istnieje plik .yml) zmienia się na true i można zacząć rozpoznawanie twarzy
+     */
     boolean trained;
 
     private boolean hasPermissions(Context context, String... permissions) {
