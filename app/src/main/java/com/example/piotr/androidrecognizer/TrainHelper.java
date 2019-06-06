@@ -180,6 +180,8 @@ public class TrainHelper {
      * photos to MatVector ze zdjęciami twarzy 160px x 160px
      * labels to Mat rozmiarem odpowiadajcy ilosci trenowanych zdjęć
      *
+     *
+     *
      * wynik treningu zapisywany jest metodą <b>eigenfaces.save(f.getAbsolutePath());</b> to pliku zdefoniowanego stałą *_FACES_CLASIFIER
      * @param context
      * @return zwraca bool. Prawda, gdy istnieją obrazy do trenowania i wykonano trening, false, gdy zdjęcia nie istnieją
