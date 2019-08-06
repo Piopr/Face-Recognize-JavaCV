@@ -21,6 +21,8 @@ import org.bytedeco.javacpp.opencv_core.Point;
 import org.bytedeco.javacpp.opencv_core.RectVector;
 import org.bytedeco.javacpp.opencv_core.Size;
 import java.io.File;
+
+import static com.example.piotr.androidrecognizer.TrainHelper.TRAIN_FOLDER;
 import static org.bytedeco.javacpp.opencv_core.FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
 import static org.bytedeco.javacpp.opencv_core.Mat;
@@ -58,15 +60,21 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
      * gdy nie jest lub zakońcono zmieniana na - false
      */
     boolean takePhoto;
+
     /**
      * obiekt do rozpoznawania twarzy
      */
     opencv_face.FaceRecognizer faceRecognizer = opencv_face.EigenFaceRecognizer.create();
+
     /**
      * jesli już nauczono twarzy (istnieje plik .yml) zmienia się na true i można zacząć rozpoznawanie twarzy
      */
     boolean trained;
 
+    /**
+     *
+     * metoda sprawdzania uprawnien. Zwraca true gdy wszystkie wymagane uprawnienia są nadane
+     */
     private boolean hasPermissions(Context context, String... permissions) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
             for (String permission : permissions) {
@@ -78,26 +86,46 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         return true;
     }
 
+    /*
+    Przy tworzeniu activity
+     */
     @SuppressLint("StaticFieldLeak")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_opencv);
+        /*
+        Sprawdzanie uprawnien czytania i pisania
+         */
         if (Build.VERSION.SDK_INT >= 23) {
             String[] PERMISSIONS = {android.Manifest.permission.READ_EXTERNAL_STORAGE,android.Manifest.permission.WRITE_EXTERNAL_STORAGE};
             if (!hasPermissions(this, PERMISSIONS)) {
                 ActivityCompat.requestPermissions(this, PERMISSIONS, 1 );
             }
         }
+        /*
+        wczytanie z activity zmiennej obsługującej podgląd kamery (wykrywanie twarzy itd.)
+         */
         cameraView = (CvCameraPreview) findViewById(R.id.camera_view);
         cameraView.setCvCameraViewListener(this);
 
 
+        /*
+        wykonywanie operacji w tle
+         */
         new AsyncTask<Void,Void,Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
+                    /***
+                     * wczytanie wzorca do detekcji twarzy
+                     */
                     faceDetector = TrainHelper.loadClassifierCascade(OpenCvRecognizeActivity.this, R.raw.frontalface);
+                    /***
+                     * Sprawdzenie, czy algorytm jest już nauczony zestawem zdjęć
+                     * Zdjęcia znajdują się w lokalizacji *\TRAIN_FOLDER
+                     * TODO: zmiana na \*TRAIN_FOLDER\user1, user2 itd.
+                     */
                     if(TrainHelper.isTrained(getBaseContext())) {
                         //File folder = new File(getFilesDir(), TrainHelper.TRAIN_FOLDER);
                         File folder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
