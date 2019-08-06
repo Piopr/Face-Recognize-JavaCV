@@ -125,6 +125,8 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                      * Sprawdzenie, czy algorytm jest już nauczony zestawem zdjęć
                      * Zdjęcia znajdują się w lokalizacji *\TRAIN_FOLDER
                      * TODO: zmiana na \*TRAIN_FOLDER\user1, user2 itd.
+                     *
+                     * na razie tylko do obsłubi EIGEN_FACES
                      */
                     if(TrainHelper.isTrained(getBaseContext())) {
                         //File folder = new File(getFilesDir(), TrainHelper.TRAIN_FOLDER);
@@ -140,6 +142,12 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                 return null;
             }
 
+            /***
+             *
+             * Po zakończeniu sprawdzania nauczenia algorytmu
+             * Obsługa przycisków
+             *
+             */
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
@@ -155,6 +163,9 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                         train();
                     }
                 });
+                /***
+                 * Po zakończeniu powrót do poprzedniego acitvity
+                 */
                 findViewById(R.id.btReset).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -171,6 +182,13 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         }.execute();
     }
 
+    /***
+     * Metoda do treningu algorytmu
+     * 1. Sprawdzenie ilości wykonanych zdjęć (alerty gdy za mało lub gdy już wytrenowano algorytm)
+     * 2. Jeśli oba warunki niespełnione start uczenia algorytmu.
+     * 3. Komunikat o powodzeniu nauczenia
+     */
+    @SuppressLint("StaticFieldLeak")
     void train() {
         int remainigPhotos = TrainHelper.PHOTOS_TRAIN_QTY - TrainHelper.qtdPhotos(getBaseContext());
         if(remainigPhotos > 0) {
@@ -220,6 +238,13 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
 
     }
 
+    /***
+     * wykonanie zdjęcia
+     * TODO: zmiana id odpowiednio do użytkownika
+     * @param rgbaMat - obraz przechwycony z cameraactivity
+     *
+     * Po wykonaniu zdjęcia zmiana takePhoto na false
+     */
     private void capturePhoto(Mat rgbaMat) {
         try {
             TrainHelper.takePhoto(getBaseContext(), 1, TrainHelper.qtdPhotos(getBaseContext()) + 1, rgbaMat.clone(), faceDetector);
@@ -229,6 +254,12 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         takePhoto = false;
     }
 
+    /***
+     *
+     * @param dadosFace - zakres w którym znajduje się twarz w momencie przechwycenia zdjęcia
+     * @param grayMat - przechwycone zdjęcie w grayscale
+     * @param rgbaMat - przechwycone zdjęcie w kolorze + kanał alfa
+     */
     private void recognize(opencv_core.Rect dadosFace, Mat grayMat, Mat rgbaMat) {
         Mat detectedFace = new Mat(grayMat, dadosFace);
         resize(detectedFace, detectedFace, new Size(TrainHelper.IMG_SIZE,TrainHelper.IMG_SIZE));
@@ -242,7 +273,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         if (prediction == -1 || acceptanceLevel >= ACCEPT_LEVEL) {
             name = getString(R.string.unknown);
         } else {
-            name = nomes[prediction] + " - " + acceptanceLevel;
+            name = nomes[prediction] + " - " + acceptanceLevel + " label: " + prediction;
         }
         int x = Math.max(dadosFace.tl().x() - 10, 0);
         int y = Math.max(dadosFace.tl().y() - 10, 0);
