@@ -26,6 +26,7 @@ import static com.example.piotr.androidrecognizer.TrainHelper.TRAIN_FOLDER;
 import static org.bytedeco.javacpp.opencv_core.FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
 import static org.bytedeco.javacpp.opencv_core.Mat;
+import static org.bytedeco.javacpp.opencv_core.cvRound;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.putText;
@@ -124,7 +125,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                     /***
                      * Sprawdzenie, czy algorytm jest już nauczony zestawem zdjęć
                      * Zdjęcia znajdują się w lokalizacji *\TRAIN_FOLDER
-                     * TODO: zmiana na \*TRAIN_FOLDER\user1, user2 itd.
+                     * TODO: zmiana na / *TRAIN_FOLDER/user1, user2 itd.
                      *
                      * na razie tylko do obsłubi EIGEN_FACES
                      */
@@ -269,11 +270,12 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         faceRecognizer.predict(detectedFace, label, reliability);
         int prediction = label.get(0);
         double acceptanceLevel = reliability.get(0);
+
         String name;
         if (prediction == -1 || acceptanceLevel >= ACCEPT_LEVEL) {
             name = getString(R.string.unknown);
         } else {
-            name = nomes[prediction] + " - " + acceptanceLevel + " label: " + prediction;
+            name = nomes[prediction] + " - " + cvRound(acceptanceLevel) + " label: " + prediction;
         }
         int x = Math.max(dadosFace.tl().x() - 10, 0);
         int y = Math.max(dadosFace.tl().y() - 10, 0);
