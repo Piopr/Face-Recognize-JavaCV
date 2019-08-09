@@ -11,21 +11,32 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Toast;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     private boolean mPermissionReady; //zmienna do kontroli nadanych uprawnien
-
+    private RadioGroup usersRG;
+    private Button sprawdzBtn;
+    private Button dodajBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         Log.d("Piopr", "dzialaj no");
+
+
         setContentView(R.layout.activity_main); //ustawienie widoku
         //obsluga klikniecia
+        usersRG = (RadioGroup) findViewById(R.id.user);
         findViewById(R.id.btnOpenCv).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -34,6 +45,44 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+
+        sprawdzBtn = (Button) findViewById(R.id.sprawdz);
+
+        sprawdzBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String wiadomosc;
+                if(usersRG.getCheckedRadioButtonId()!=-1) {
+                    RadioButton selected = (RadioButton) findViewById(usersRG.getCheckedRadioButtonId());
+                    wiadomosc = selected.getText().toString();
+                    wiadomosc += " id: " + selected.getId();
+
+                    Toast.makeText(getBaseContext(), wiadomosc, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getBaseContext(), "Nikogo nie wybrano", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        makeListOfUsers();
+
+
+        dodajBtn = (Button) findViewById(R.id.dodaj);
+        dodajBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(findViewById(R.id.nazwa).getVisibility()==View.INVISIBLE){
+                    findViewById(R.id.nazwa).setVisibility(View.VISIBLE);
+                } else {
+                    findViewById(R.id.nazwa).setVisibility(View.INVISIBLE);
+                }
+
+            }
+        });
+
+
+
 
         int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA); //jesli nadano: 0, jesli nie: -1
         int storagePermssion = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);//jesli nadano: 0, jesli nie: -1
@@ -69,4 +118,26 @@ public class MainActivity extends AppCompatActivity {
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
+
+    void makeListOfUsers() {
+        File folder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        String[] users = folder.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory();
+            }
+        });
+
+        //test widoku
+        usersRG = (RadioGroup) findViewById(R.id.user);
+
+
+        for(String t :users){
+            RadioButton userRB = new RadioButton(this);
+            userRB.setText(t.substring(1,t.length()));
+            usersRG.addView(userRB);
+            Log.d("Piopr", t.substring(1,t.length()));
+        }
+        //userRB.setHeight(100);
+        }
 }
