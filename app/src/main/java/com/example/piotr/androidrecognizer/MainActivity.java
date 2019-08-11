@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -19,8 +20,11 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.IntSummaryStatistics;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -37,6 +41,20 @@ public class MainActivity extends AppCompatActivity {
 
 
         setContentView(R.layout.activity_main); //ustawienie widoku
+
+        int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA); //jesli nadano: 0, jesli nie: -1
+        int storagePermssion = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);//jesli nadano: 0, jesli nie: -1
+        mPermissionReady = cameraPermission == PackageManager.PERMISSION_GRANTED
+                && storagePermssion == PackageManager.PERMISSION_GRANTED; //gdy oba uprawnienia nadane, wartosc mPermissionReady: true
+        if (!mPermissionReady)
+            requirePermissions(); //jesli nie nadano uprawnien, prosba o nadanie
+        //tworzenie głównego folderu "train folder"
+        File folder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        if(!folder.exists()){
+        folder.mkdir();}
+
+
+
         //obsluga klikniecia
         usersRG = (RadioGroup) findViewById(R.id.user);
         findViewById(R.id.btnOpenCv).setOnClickListener(new View.OnClickListener() {
@@ -95,16 +113,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-
-
-
-        int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA); //jesli nadano: 0, jesli nie: -1
-        int storagePermssion = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);//jesli nadano: 0, jesli nie: -1
-        mPermissionReady = cameraPermission == PackageManager.PERMISSION_GRANTED
-                && storagePermssion == PackageManager.PERMISSION_GRANTED; //gdy oba uprawnienia nadane, wartosc mPermissionReady: true
-        if (!mPermissionReady)
-            requirePermissions(); //jesli nie nadano uprawnien, prosba o nadanie
     }
 
     private void requirePermissions() {
@@ -165,25 +173,39 @@ public class MainActivity extends AppCompatActivity {
                 return new File(current, name).isDirectory();
             }
         });
+        Integer[] usersIds = new Integer[users.length];
+        for(int i = 0; i<users.length; i++){
+            usersIds[i]=Integer.parseInt(users[i].substring(0,1));
+        }
 
         for(int i =0; i<users.length; i++){
             users[i] = users[i].substring(1, users[i].length());
         }
+        String komunikat = "";
+        for(int i=0; i<users.length; i++){
+            komunikat+=usersIds[i]+" "+users[i]+"\n";
+        }
+        Log.d("Piopr", komunikat);
 
         //sprawdzanie, czy uzytkownik istnieje
         if(Arrays.asList(users).contains(username)){
             Log.d("Piopr", "Podany uzytkownik istnieje");
             Toast.makeText(getBaseContext(), "Podany uzytkownik istnieje", Toast.LENGTH_LONG).show();
         } else {
-            username = Integer.toString(users.length+1) + username;
-            Log.d("Piopr", username);
+
+            //szukanie max id dla poprawnego nadawania id uzytkownikom
+            int maxId = 0;
+            for(int t : usersIds){
+                maxId = Math.max(maxId, t);
+            }
+            username = Integer.toString(maxId+1) + username;
             File createdUser = new File(trainFolder, username);
             createdUser.mkdir();
             makeListOfUsers();
 
 
         }
-
+        Log.d("Piopr", username);
         for(String t : users){
             Log.d("Piopr", t);
         }
