@@ -12,12 +12,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
                     RadioButton selected = (RadioButton) findViewById(usersRG.getCheckedRadioButtonId());
                     wiadomosc = selected.getText().toString();
                     wiadomosc += " id: " + selected.getId();
+                    makeListOfUsers();
 
                     Toast.makeText(getBaseContext(), wiadomosc, Toast.LENGTH_SHORT).show();
                 } else {
@@ -72,11 +75,23 @@ public class MainActivity extends AppCompatActivity {
         dodajBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(findViewById(R.id.nazwa).getVisibility()==View.INVISIBLE){
-                    findViewById(R.id.nazwa).setVisibility(View.VISIBLE);
+//                if(findViewById(R.id.nazwa).getVisibility()==View.INVISIBLE){
+//                    findViewById(R.id.nazwa).setVisibility(View.VISIBLE);
+//                } else {
+//                    findViewById(R.id.nazwa).setVisibility(View.INVISIBLE);
+//                }
+
+                File folder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+                EditText userEditText = (EditText) findViewById(R.id.nazwa);
+                String nameOfUser = userEditText.getText().toString().toLowerCase();
+                if(nameOfUser.isEmpty()){
+                    Toast.makeText(getBaseContext(), "Puste pole tekstowe.", Toast.LENGTH_LONG).show();
                 } else {
-                    findViewById(R.id.nazwa).setVisibility(View.INVISIBLE);
+                    //Toast.makeText(getBaseContext(), nameOfUser, Toast.LENGTH_LONG).show();
+                    makeNewUser(nameOfUser);
+
                 }
+
 
             }
         });
@@ -130,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
 
         //test widoku
         usersRG = (RadioGroup) findViewById(R.id.user);
+        usersRG.removeAllViews();
 
 
         for(String t :users){
@@ -140,4 +156,37 @@ public class MainActivity extends AppCompatActivity {
         }
         //userRB.setHeight(100);
         }
+
+    void makeNewUser(String username){
+        File trainFolder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        String[] users = trainFolder.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory();
+            }
+        });
+
+        for(int i =0; i<users.length; i++){
+            users[i] = users[i].substring(1, users[i].length());
+        }
+
+        //sprawdzanie, czy uzytkownik istnieje
+        if(Arrays.asList(users).contains(username)){
+            Log.d("Piopr", "Podany uzytkownik istnieje");
+            Toast.makeText(getBaseContext(), "Podany uzytkownik istnieje", Toast.LENGTH_LONG).show();
+        } else {
+            username = Integer.toString(users.length+1) + username;
+            Log.d("Piopr", username);
+            File createdUser = new File(trainFolder, username);
+            createdUser.mkdir();
+            makeListOfUsers();
+
+
+        }
+
+        for(String t : users){
+            Log.d("Piopr", t);
+        }
+
+    }
 }
