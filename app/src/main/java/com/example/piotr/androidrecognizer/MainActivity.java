@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private RadioGroup usersRG;
     private Button sprawdzBtn;
     private Button dodajBtn;
+    private Button usunBtn;
+    //TODO: przekazywanie id uzytkownika do nastepnego activity, wybranie folderu w ktorym beda przechowywane zdjecia
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -93,11 +95,7 @@ public class MainActivity extends AppCompatActivity {
         dodajBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                if(findViewById(R.id.nazwa).getVisibility()==View.INVISIBLE){
-//                    findViewById(R.id.nazwa).setVisibility(View.VISIBLE);
-//                } else {
-//                    findViewById(R.id.nazwa).setVisibility(View.INVISIBLE);
-//                }
+
 
                 File folder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
                 EditText userEditText = (EditText) findViewById(R.id.nazwa);
@@ -108,9 +106,27 @@ public class MainActivity extends AppCompatActivity {
                     //Toast.makeText(getBaseContext(), nameOfUser, Toast.LENGTH_LONG).show();
                     makeNewUser(nameOfUser);
 
+
                 }
 
 
+            }
+        });
+
+
+        usunBtn = (Button) findViewById(R.id.usun);
+        usunBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(usersRG.getCheckedRadioButtonId()==-1){
+                    Toast.makeText(getBaseContext(), "Nie wybrano uzytkownika lub juz nie istnieje.", Toast.LENGTH_LONG).show();
+                    makeListOfUsers();
+                } else {
+                    RadioButton selected = (RadioButton) findViewById(usersRG.getCheckedRadioButtonId());
+                    String username = selected.getText().toString();
+                    deleteUser(username);
+                }
             }
         });
     }
@@ -160,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
             RadioButton userRB = new RadioButton(this);
             userRB.setText(t.substring(1,t.length()));
             usersRG.addView(userRB);
-            Log.d("Piopr", t.substring(1,t.length()));
+            Log.d("Piopr", t);
         }
         //userRB.setHeight(100);
         }
@@ -173,14 +189,9 @@ public class MainActivity extends AppCompatActivity {
                 return new File(current, name).isDirectory();
             }
         });
-        Integer[] usersIds = new Integer[users.length];
-        for(int i = 0; i<users.length; i++){
-            usersIds[i]=Integer.parseInt(users[i].substring(0,1));
-        }
+        Integer[] usersIds = getUserIds(users);
+        users = getUserNames(users);
 
-        for(int i =0; i<users.length; i++){
-            users[i] = users[i].substring(1, users[i].length());
-        }
         String komunikat = "";
         for(int i=0; i<users.length; i++){
             komunikat+=usersIds[i]+" "+users[i]+"\n";
@@ -209,6 +220,67 @@ public class MainActivity extends AppCompatActivity {
         for(String t : users){
             Log.d("Piopr", t);
         }
+    }
+
+    void deleteUser(String username){
+        File trainFolder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        String[] userList = trainFolder.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory();
+            }
+        });
+
+        Integer[] userIds = getUserIds(userList);
+        String[] userNames = getUserNames(userList);
+        int indedOfFound = Arrays.asList(userNames).indexOf(username);
+        Log.d("Piopr", "Znaleziony index uzytkownika: " + indedOfFound);
+        Log.d("Piopr", "Czy poprawny id?: " + Arrays.asList(userIds).get(indedOfFound) + " dla " +
+                Arrays.asList(userNames).get(indedOfFound));
+
+        String nameOfFolder;
+        nameOfFolder = Arrays.asList(userIds).get(indedOfFound).toString() + Arrays.asList(userNames).get(indedOfFound);
+
+        File folderToDelete = new File(trainFolder, nameOfFolder);
+
+        deleteRecursive(folderToDelete);
+        makeListOfUsers();
+
+
 
     }
+
+    /**
+     * Zwraca id wszystkich uzytkownikow (wyniki pasuja do tablicy z metody getUserNames())
+     * @param users - lista folderow uzytkownikow (id + nazwa)
+     * @return tablica id uzytkownikow typu int
+     */
+    Integer[] getUserIds(String[] users){
+        Integer[] usersIds = new Integer[users.length];
+        for(int i = 0; i<users.length; i++){
+            usersIds[i]=Integer.parseInt(users[i].substring(0,1));
+        }
+        return usersIds;
+    }
+
+    String[] getUserNames(String[] users){
+        for(int i =0; i<users.length; i++){
+            users[i] = users[i].substring(1, users[i].length());
+        }
+        return users;
+    }
+
+    /***
+     * Rekursywne usuwanie folderów i plikow
+     *
+     * @param fileOrDirectory - folder, który chcemy usunac (podfoldery takze zostana usuniete)
+     */
+    void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
+
+        fileOrDirectory.delete();
+    }
+
 }
