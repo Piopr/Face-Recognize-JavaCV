@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -72,20 +71,17 @@ public class MainActivity extends AppCompatActivity {
 
         sprawdzBtn = (Button) findViewById(R.id.sprawdz);
 
-        sprawdzBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String wiadomosc;
-                if(usersRG.getCheckedRadioButtonId()!=-1) {
-                    RadioButton selected = (RadioButton) findViewById(usersRG.getCheckedRadioButtonId());
-                    wiadomosc = selected.getText().toString();
-                    wiadomosc += " id: " + selected.getId();
-                    makeListOfUsers();
+        sprawdzBtn.setOnClickListener(view -> {
+            String wiadomosc;
+            if(usersRG.getCheckedRadioButtonId()!=-1) {
+                RadioButton selected = (RadioButton) findViewById(usersRG.getCheckedRadioButtonId());
+                wiadomosc = selected.getText().toString();
+                wiadomosc += " id: " + selected.getId();
+                makeListOfUsers();
 
-                    Toast.makeText(getBaseContext(), wiadomosc, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getBaseContext(), "Nikogo nie wybrano", Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(getBaseContext(), wiadomosc, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getBaseContext(), "Nikogo nie wybrano", Toast.LENGTH_SHORT).show();
             }
         });
         makeListOfUsers();
@@ -158,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    void makeListOfUsers() {
+    private void makeListOfUsers() {
         File folder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
         String[] users = folder.list(new FilenameFilter() {
             @Override
@@ -174,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
 
         for(String t :users){
             RadioButton userRB = new RadioButton(this);
-            userRB.setText(t.substring(1,t.length()));
+            userRB.setText(t.substring(1));
             usersRG.addView(userRB);
             Log.d("Piopr", t);
         }
