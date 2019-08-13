@@ -86,7 +86,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         }
         return true;
     }
-
+//
     /*
     Przy tworzeniu activity
      */
