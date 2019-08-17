@@ -44,10 +44,11 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
      * zmienna CascadeClassifiera, czyli wzorca do detekcji twarzy
      */
     private CascadeClassifier faceDetector;
+    //TODO: generowac liste nazw uzytkownikow odpowiednio do id
     /**
      * Komunikat pojawiający się podczas wykrycia twarzy
      */
-    private String[] nomes = {"", "Y Know You"};
+    private String[] nomes = {"", "Y Know You", "Znamy sie", "Pozdrawiam"};
     /**
      * minimalny rozmiar twarzy na activity kamery. Minimalna wartość, to 1/3 szerokości activity.
      */
