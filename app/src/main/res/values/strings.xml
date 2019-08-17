@@ -2,5 +2,5 @@
     <string name="app_name">AndroidRecognizer</string>
     <string name="permission_warning">Aby kontynuowac, prosze wlaczyc uprawnienia kamery oraz uzywanie pamieci zewnetrznej.</string>
     <string name="dismiss">Dismiss</string>
-    <string name="unknown">Unknown</string>
+    <string name="unknown">Nieznany uzytkownik</string>
 </resources>

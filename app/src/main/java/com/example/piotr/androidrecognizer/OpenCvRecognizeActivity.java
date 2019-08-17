@@ -3,7 +3,6 @@ package com.example.piotr.androidrecognizer;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -22,7 +21,6 @@ import org.bytedeco.javacpp.opencv_core.RectVector;
 import org.bytedeco.javacpp.opencv_core.Size;
 import java.io.File;
 
-import static com.example.piotr.androidrecognizer.TrainHelper.TRAIN_FOLDER;
 import static org.bytedeco.javacpp.opencv_core.FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
 import static org.bytedeco.javacpp.opencv_core.Mat;
@@ -34,6 +32,20 @@ import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_objdetect.CascadeClassifier;
 import static com.example.piotr.androidrecognizer.TrainHelper.ACCEPT_LEVEL;
+
+
+/**
+ * Struktura plikow:
+ *      mnt/sdcard/trainfolder
+ *      ---1user/
+ *              --person.id.numberofphoto.jpg
+ *              --person.1.2.jpg
+ *              --person.1.3.jpg
+ *      ---2admin
+ *              --person.2.1.jpg
+ *              --person.2.2.jpg
+ *      ---eigenFacesClassifier.yml
+ */
 
 /**
  * Created by djalmaafilho.
@@ -48,7 +60,10 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
     /**
      * Komunikat pojawiający się podczas wykrycia twarzy
      */
-    private String[] nomes = {"", "Y Know You", "Znamy sie", "Pozdrawiam"};
+    private String[] usersNamesArray;/* = {"", "Y Know You", "Znamy sie", "Pozdrawiam"};*/
+
+    private Integer[] usersIdArray;
+
     /**
      * minimalny rozmiar twarzy na activity kamery. Minimalna wartość, to 1/3 szerokości activity.
      */
@@ -111,6 +126,15 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         cameraView = (CvCameraPreview) findViewById(R.id.camera_view);
         cameraView.setCvCameraViewListener(this);
 
+        /*
+        Zaladowanie nazw i id userow (stworzonych folderow)
+         */
+        usersNamesArray = TrainHelper.getUserNames();
+        usersIdArray = TrainHelper.getUserIds();
+        for(String s : usersNamesArray)
+            Log.d("Piopr", s);
+        for(Integer i : usersIdArray)
+            Log.d("Piopr", Integer.toString(i));
 
         /*
         wykonywanie operacji w tle
@@ -272,14 +296,14 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         faceRecognizer.predict(detectedFace, label, reliability);
         int prediction = label.get(0);
         //sprawdzanie zawartosci zmiennej label
-        Log.d("Piopr", "label.get(0): " + label.get(0));
+        //Log.d("Piopr", "label.get(0): " + label.get(0));
         double acceptanceLevel = reliability.get(0);
 
         String name;
         if (prediction == -1 || acceptanceLevel >= ACCEPT_LEVEL) {
             name = getString(R.string.unknown);
         } else {
-            name = nomes[prediction] + " - " + cvRound(acceptanceLevel) + " label: " + prediction;
+            name = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
         }
         int x = Math.max(dadosFace.tl().x() - 10, 0);
         int y = Math.max(dadosFace.tl().y() - 10, 0);

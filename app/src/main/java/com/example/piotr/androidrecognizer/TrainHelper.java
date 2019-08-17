@@ -73,6 +73,8 @@ public class TrainHelper {
      */
     public static final double ACCEPT_LEVEL = 4000.0D;
 
+    public static String[] users;
+
     /**
      * obsługa przycisku reset (usunięcie wszystkich zdjęć w folderze treningu)
      * @param context
@@ -354,5 +356,34 @@ public class TrainHelper {
         cascadeFile.delete();
 
         return detector;
+    }
+
+    public static Integer[] getUserIds(){
+        File trainFolder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        String[] users = trainFolder.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory();
+            }
+        });
+        Integer[] usersIds = new Integer[users.length];
+        for(int i = 0; i<users.length; i++){
+            usersIds[i]=Integer.parseInt(users[i].substring(0,1));
+        }
+        return usersIds;
+    }
+
+    public static String[] getUserNames(){
+        File trainFolder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        String[] users = trainFolder.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory();
+            }
+        });
+        for(int i =0; i<users.length; i++){
+            users[i] = users[i].substring(1, users[i].length());
+        }
+        return users;
     }
 }
