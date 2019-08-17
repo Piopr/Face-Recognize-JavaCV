@@ -129,7 +129,7 @@ public class TrainHelper {
 
                 File[] photos = photosFolder.listFiles(imageFilter);
                 File[] train = photosFolder.listFiles(trainFilter);
-                return photos != null && train != null && photos.length == PHOTOS_TRAIN_QTY && train.length > 0;
+                return photos != null && train != null /*&& photos.length == PHOTOS_TRAIN_QTY */&& train.length > 0;
             } else {
                 return false;
             }

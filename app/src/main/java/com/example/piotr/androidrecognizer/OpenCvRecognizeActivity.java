@@ -212,6 +212,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                     }
                 }catch (Exception e) {
                     Log.d(TAG, e.getLocalizedMessage(), e);
+                    Log.d("Piopr", e.getLocalizedMessage(), e);
                 }
                 return null;
             }
@@ -269,6 +270,8 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         DoublePointer reliability = new DoublePointer(1);
         faceRecognizer.predict(detectedFace, label, reliability);
         int prediction = label.get(0);
+        //sprawdzanie zawartosci zmiennej label
+        Log.d("Piopr", "label.get(0): " + label.get(0));
         double acceptanceLevel = reliability.get(0);
 
         String name;
