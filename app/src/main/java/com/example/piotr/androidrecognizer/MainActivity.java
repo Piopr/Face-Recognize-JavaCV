@@ -61,9 +61,23 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnOpenCv).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mPermissionReady) { //warunek, czy nadano uprawnienia
-                    startActivity(new Intent(MainActivity.this, OpenCvRecognizeActivity.class)); //zmiana widoku
+
+                if(usersRG.getCheckedRadioButtonId()==-1){
+                    Toast.makeText(getBaseContext(), "Nie wybrano uzytkownika lub juz nie istnieje.", Toast.LENGTH_LONG).show();
+
+                } else {
+                    RadioButton selected = (RadioButton) findViewById(usersRG.getCheckedRadioButtonId());
+                    String username = selected.getText().toString();
+                    saveIdAndName(username);
+                    Log.d("Piopr", "Nazwa usera: " + TrainHelper.CURRENT_USER +" id: " + TrainHelper.CURRENT_IDUSER);
+                    //deleteUser(username);
+
+                    if (mPermissionReady) { //warunek, czy nadano uprawnienia
+                        startActivity(new Intent(MainActivity.this, OpenCvRecognizeActivity.class)); //zmiana widoku
+                    }
                 }
+
+
             }
         });
 
@@ -229,13 +243,13 @@ public class MainActivity extends AppCompatActivity {
 
         Integer[] userIds = getUserIds(userList);
         String[] userNames = getUserNames(userList);
-        int indedOfFound = Arrays.asList(userNames).indexOf(username);
-        Log.d("Piopr", "Znaleziony index uzytkownika: " + indedOfFound);
-        Log.d("Piopr", "Czy poprawny id?: " + Arrays.asList(userIds).get(indedOfFound) + " dla " +
-                Arrays.asList(userNames).get(indedOfFound));
+        int indexOfFound = Arrays.asList(userNames).indexOf(username);
+        Log.d("Piopr", "Znaleziony index uzytkownika: " + indexOfFound);
+        Log.d("Piopr", "Czy poprawny id?: " + Arrays.asList(userIds).get(indexOfFound) + " dla " +
+                Arrays.asList(userNames).get(indexOfFound));
 
         String nameOfFolder;
-        nameOfFolder = Arrays.asList(userIds).get(indedOfFound).toString() + Arrays.asList(userNames).get(indedOfFound);
+        nameOfFolder = Arrays.asList(userIds).get(indexOfFound).toString() + Arrays.asList(userNames).get(indexOfFound);
 
         File folderToDelete = new File(trainFolder, nameOfFolder);
 
@@ -277,6 +291,23 @@ public class MainActivity extends AppCompatActivity {
                 deleteRecursive(child);
 
         fileOrDirectory.delete();
+    }
+
+    void saveIdAndName(String username){
+        File trainFolder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        String[] userList = trainFolder.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory();
+            }
+        });
+
+        Integer[] userIds = getUserIds(userList);
+        String[] userNames = getUserNames(userList);
+        int indexOfFound = Arrays.asList(userNames).indexOf(username);
+
+        TrainHelper.CURRENT_IDUSER = Arrays.asList(userIds).get(indexOfFound);
+        TrainHelper.CURRENT_USER = Arrays.asList(userNames).get(indexOfFound);
     }
 
 }

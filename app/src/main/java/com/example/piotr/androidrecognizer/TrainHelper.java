@@ -73,8 +73,8 @@ public class TrainHelper {
      */
     public static final double ACCEPT_LEVEL = 4000.0D;
 
-    public static String[] users;
-
+    public static String CURRENT_USER;
+    public static int CURRENT_IDUSER;
     /**
      * obsługa przycisku reset (usunięcie wszystkich zdjęć w folderze treningu)
      * @param context
