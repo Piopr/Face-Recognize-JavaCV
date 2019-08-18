@@ -309,6 +309,71 @@ public class TrainHelper {
     }
 
     /**
+     * zapis zdjęcia
+     *
+     * Na początku kontrola, czy istnieje folder. Jeśli nie - tworzy go
+     * Stworzenie kopii zdjęcia w zmiennej greyMat klasy Mat. Przekształcenie na greyscale
+     * Stworzenie wektora o 4 współrzędnych (współrzędne tworzonego kwadratu podczas detekcji twarzy), zmienna detectedFaces.
+     *
+     *zdjęcie zapisuje się w formacie: person.personId.photonumber.jpg
+     *
+     * użycie metody detectMultiScale() na obiekcie faceDetector:
+     *  detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
+     *      greyMat - zdjęcie z którygo chcemy wykryć twarz
+     *      detectedFaces - obiekt, do którego zapisujemy współrzędne, w których została wykryta twarz na zdjęciu
+     *      1.1 - współczynnik, który określa o ile wielkośc obrazu zostanie zmniejszona
+     *      1 - Parametr określający, ilu sąsiadów każdy kandydujący prostokąt powinien zachować.
+     *      0 - używane w starszych wersjach cascadeClassifier
+     *      150, 150 - minimalny rozmiar w pikselach fragmentu zdjęcia, na którym znajduje się twarz
+     *      500, 500 - maksymalny rozmiar na zdjęciu, na którym może znaleźć się twarz
+     *
+     *wykonuje się pętla przechodząca po wszystkich wykrytych tawrzach (zwykle, i poprawnie po jednej),
+     * w tej pętli wszystkie wykryte twarze nadpisywane są do wcześniej stworzonego pliku .jpg w skali szarości i rozmiarze określonym
+     * w zmiennej IMG_SIZE
+     *
+     * @param context - aktualny widok
+     * @param personId - id osoby - dodawane do nazwy pliku
+     * @param photoNumber - numer zrobionego zdjęcia, dodawane do nazwy pliku
+     * @param rgbaMat - oryginalny obrazek, przechwycony z cameraactivity
+     * @param faceDetector - obiekt CascadeClassifier z pliku frontalface.xml
+     * @throws Exception
+     */
+    public static void takePhotoNew(Context context, int personId, int photoNumber, Mat rgbaMat, opencv_objdetect.CascadeClassifier faceDetector, String personDirName) throws Exception {
+        //File folder = new File(context.getFilesDir(), TRAIN_FOLDER);
+        File folder = new File("/mnt/sdcard/", TRAIN_FOLDER+"/"+ personDirName);
+        Log.d("Piopr", folder.toString());
+        if (folder.exists() && !folder.isDirectory())
+            folder.delete();
+        if (!folder.exists())
+            folder.mkdirs();
+
+        int qtyPhotos = PHOTOS_TRAIN_QTY;
+        Mat greyMat = new Mat(rgbaMat.rows(), rgbaMat.cols());
+
+        cvtColor(rgbaMat, greyMat, CV_BGR2GRAY);
+        opencv_core.RectVector detectedFaces = new opencv_core.RectVector();
+        faceDetector.detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
+        for (int i = 0; i < detectedFaces.size(); i++) {
+            //TODO: zmiana funkcji, by zapisywała zdjęcia w odpowiednim folderze, obsłużenie parametru personDirName, poprawa metody qtdPhotos
+
+            opencv_core.Rect rectFace = detectedFaces.get(0);
+            Log.d("Piopr", "rectFace :  " + rectFace.get());
+            rectangle(rgbaMat, rectFace, new opencv_core.Scalar(0, 0, 255, 0));
+
+
+
+            Mat capturedFace = new Mat(greyMat, rectFace);
+            resize(capturedFace, capturedFace, new Size(IMG_SIZE, IMG_SIZE));
+
+            File f = new File(folder, String.format(FILE_NAME_PATTERN, personId, photoNumber));
+            f.createNewFile();
+            imwrite(f.getAbsolutePath(), capturedFace);
+
+        }
+    }
+
+
+    /**
      * załadowanie kaskady do detekcji twarzy, bez znaczenia dla pracy
      */
     public static opencv_objdetect.CascadeClassifier loadClassifierCascade(Context context, int resId) {
