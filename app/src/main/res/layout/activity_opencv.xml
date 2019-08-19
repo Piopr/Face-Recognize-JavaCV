@@ -20,6 +20,14 @@
         android:text="Start Train"
         android:layout_gravity="bottom|left"
         />
+    <Button
+        android:id="@+id/btDetect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Przygotuj"
+        android:layout_gravity="bottom|left"
+        android:layout_marginBottom="50dp"
+        />
 
     <Button
         android:id="@+id/btPhoto"
