@@ -75,6 +75,7 @@ public class TrainHelper {
 
     public static String CURRENT_USER;
     public static int CURRENT_IDUSER;
+    public static String CURRENT_FOLDER;
     /**
      * obsługa przycisku reset (usunięcie wszystkich zdjęć w folderze treningu)
      * @param context
@@ -95,9 +96,7 @@ public class TrainHelper {
             };
 
             File[] files = photosFolder.listFiles(imageFilter);
-            for(File file : files){
-                //Log.d("Piopr", file.toString());
-            }
+
             for (File file : files) {
                 file.delete();
             }
@@ -150,6 +149,23 @@ public class TrainHelper {
     public static int qtdPhotos(Context context) {
         //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
         File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
+        if (photosFolder.exists()) {
+            FilenameFilter imageFilter = new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    return name.endsWith(".jpg") || name.endsWith(".gif") || name.endsWith(".png");
+                }
+            };
+
+            File[] files = photosFolder.listFiles(imageFilter);
+            return files != null ? files.length : 0;
+        }
+        return 0;
+    }
+
+    public static int qtdPhotosNew() {
+        //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
+        File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER +"/"+TrainHelper.CURRENT_FOLDER);
         if (photosFolder.exists()) {
             FilenameFilter imageFilter = new FilenameFilter() {
                 @Override
@@ -447,7 +463,7 @@ public class TrainHelper {
             }
         });
         for(int i =0; i<users.length; i++){
-            users[i] = users[i].substring(1, users[i].length());
+            users[i] = users[i].substring(1);
         }
         return users;
     }

@@ -308,6 +308,8 @@ public class MainActivity extends AppCompatActivity {
 
         TrainHelper.CURRENT_IDUSER = Arrays.asList(userIds).get(indexOfFound);
         TrainHelper.CURRENT_USER = Arrays.asList(userNames).get(indexOfFound);
+        TrainHelper.CURRENT_FOLDER = TrainHelper.CURRENT_IDUSER+TrainHelper.CURRENT_USER;
+        Log.d("Piopr", "Aktualny folder: " + TrainHelper.CURRENT_FOLDER);
     }
 
 }
