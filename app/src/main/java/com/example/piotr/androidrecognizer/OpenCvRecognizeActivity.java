@@ -205,13 +205,24 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                     }
                 });
                 /**
-                 * obsługa przerobienia oryginalnych zdjęć na zdjecia twarzy w grayscale 160x160 px
+                 * Przygotowanie oryginalnych zdjec do przetworzenia
                  */
-                findViewById(R.id.btDetect).setOnClickListener(new View.OnClickListener() {
+                findViewById(R.id.btPrzygotuj).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         TrainHelper.renamePhotos();
                         TrainHelper.listPhotos();
+                    }
+                });
+
+                findViewById(R.id.btDetect).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        try {
+                            TrainHelper.detectFaceFromPhotos(getBaseContext(), faceDetector, TrainHelper.CURRENT_FOLDER);
+                        } catch (Exception e) {
+                            Log.d("Piopr", e.getLocalizedMessage(), e);
+                        }
                     }
                 });
             }
