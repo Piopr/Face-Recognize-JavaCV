@@ -250,20 +250,21 @@ public class TrainHelper {
         FaceRecognizer fisherfaces = opencv_face.FisherFaceRecognizer.create();
         FaceRecognizer lbph = opencv_face.LBPHFaceRecognizer.create();
         eigenfaces.train(photos, labels);
+
         File f = new File(photosFolder, EIGEN_FACES_CLASSIFIER);
         f.createNewFile();
         eigenfaces.save(f.getAbsolutePath());
 
 //TODO: Implement this other classifiers
-//        fisherfaces.train(photos, labels);
-//        f = new File(photosFolder, FISHER_FACES_CLASSIFIER);
-//        f.createNewFile();
-//        fisherfaces.save(f.getAbsolutePath());
-//
-//        lbph.train(photos, labels);
-//        f = new File(photosFolder, LBPH_CLASSIFIER);
-//        f.createNewFile();
-//        lbph.save(f.getAbsolutePath());
+        fisherfaces.train(photos, labels);
+        f = new File(photosFolder, FISHER_FACES_CLASSIFIER);
+        f.createNewFile();
+        fisherfaces.save(f.getAbsolutePath());
+
+        lbph.train(photos, labels);
+        f = new File(photosFolder, LBPH_CLASSIFIER);
+        f.createNewFile();
+        lbph.save(f.getAbsolutePath());
         return true;
     }
 
