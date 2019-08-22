@@ -253,7 +253,7 @@ public class TrainHelper {
 
         File f = new File(photosFolder, EIGEN_FACES_CLASSIFIER);
         f.createNewFile();
-        eigenfaces.save(f.getAbsolutePath());
+       eigenfaces.save(f.getAbsolutePath());
 
 //TODO: Implement this other classifiers
         fisherfaces.train(photos, labels);

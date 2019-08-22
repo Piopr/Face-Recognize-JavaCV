@@ -60,7 +60,8 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
     /**
      * Komunikat pojawiający się podczas wykrycia twarzy
      */
-    private String[] usersNamesArray;/* = {"", "Y Know You", "Znamy sie", "Pozdrawiam"};*/
+    private String[] usersNamesArray = {"", "Y Know You", "Znamy sie", "Pozdrawiam", "Poka", "Marian"};
+    //private String[] usersNamesArray;/* = {"", "Y Know You", "Znamy sie", "Pozdrawiam"};*/
 
     private Integer[] usersIdArray;
 
@@ -82,6 +83,8 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
      * obiekt do rozpoznawania twarzy
      */
     opencv_face.FaceRecognizer faceRecognizer = opencv_face.EigenFaceRecognizer.create();
+    opencv_face.FaceRecognizer faceFisher = opencv_face.FisherFaceRecognizer.create();
+    opencv_face.FaceRecognizer faceLBPH = opencv_face.LBPHFaceRecognizer.create();
 
     /**
      * jesli już nauczono twarzy (istnieje plik .yml) zmienia się na true i można zacząć rozpoznawanie twarzy
@@ -129,7 +132,8 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         /*
         Zaladowanie nazw i id userow (stworzonych folderow)
          */
-        usersNamesArray = TrainHelper.getUserNames();
+        //usersNamesArray = TrainHelper.getUserNames();
+        //usersNamesArray = {"", "Y Know You", "Znamy sie", "Pozdrawiam"};
         usersIdArray = TrainHelper.getUserIds();
         for(String s : usersNamesArray)
             Log.d("Piopr", s);
@@ -160,6 +164,10 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                         File f = new File(folder, TrainHelper.EIGEN_FACES_CLASSIFIER);
 //                        faceRecognizer.load(f.getAbsolutePath());
                         faceRecognizer.read(f.getAbsolutePath());
+                         f = new File(folder, TrainHelper.FISHER_FACES_CLASSIFIER);
+                        faceFisher.read(f.getAbsolutePath());
+                         f = new File(folder, TrainHelper.LBPH_CLASSIFIER);
+                        faceLBPH.read(f.getAbsolutePath());
                         trained = true;
                     }
                 }catch (Exception e) {
@@ -331,6 +339,22 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         int x = Math.max(dadosFace.tl().x() - 10, 0);
         int y = Math.max(dadosFace.tl().y() - 10, 0);
         putText(rgbaMat, name, new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0,255,0,0));
+
+        faceFisher.predict(detectedFace, label, reliability);
+
+         prediction = label.get(0);
+        //sprawdzanie zawartosci zmiennej label
+        //Log.d("Piopr", "label.get(0): " + label.get(0));
+         acceptanceLevel = reliability.get(0);
+
+        if (prediction == -1 || acceptanceLevel >= ACCEPT_LEVEL) {
+            name = getString(R.string.unknown);
+        } else {
+            name = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
+        }
+        putText(rgbaMat, name, new Point(x-20, y-20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0,255,0,0));
+
+
     }
 
     void showDetectedFace(RectVector faces, Mat rgbaMat) {
