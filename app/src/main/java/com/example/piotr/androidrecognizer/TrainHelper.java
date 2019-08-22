@@ -434,54 +434,45 @@ public class TrainHelper {
             Toast.makeText(context, "Brak zdjec do przetworzenia", Toast.LENGTH_SHORT).show();
             return;
         }
-//        new AsyncTask<Void, Void, Void>(){
-//            @Override
-//            protected Void doInBackground(Void... voids) {
+
 
 
                 for(File f : allPhotos){
                     Mat photoMat = imread(f.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
                     int height = photoMat.rows();
                     int width = photoMat.cols();
+                    int maxFaceSize = height>width?width:height;
+                    int minFaceSize = maxFaceSize/6;
                     int newWidth = 640;
                     int newHeight = (int) (640*(4.0f/3.0f));
-                    Log.d("Piopr", "Height: " + height +" width: " + width);
-                    Log.d("Piopr", "New Height: " + newHeight +" Newwidth: " + newWidth);
-                    resize(photoMat, photoMat, new Size(newWidth, newHeight));
-                    Log.d("Piopr", "Wczytano zdjecie do grayscale");
+
+                    if(width!=160) {
+                    //resize(photoMat, photoMat, new Size(newWidth, newHeight));
                     opencv_core.RectVector detectedFaces = new opencv_core.RectVector();
-                    Log.d("Piopr", "Tworzenie rectvectora");
-                    faceDetector.detectMultiScale(photoMat, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
+                    //faceDetector.detectMultiScale(photoMat, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
+                    faceDetector.detectMultiScale(photoMat, detectedFaces, 1.1, 1, 0, new Size(minFaceSize, minFaceSize), new Size(maxFaceSize, maxFaceSize));
                     Log.d("Piopr", "wykrywanie twarzy na zdjeciu");
                     for (int i = 0; i < detectedFaces.size(); i++) {
                         opencv_core.Rect rectFace = detectedFaces.get(0);
-                        Log.d("Piopr", "Zapisanie wartosci z detected faces");
+
                         //czy zamiast photoMat oryginalny w kolorze?
                         rectangle(photoMat, rectFace, new opencv_core.Scalar(0, 0, 255, 0));
-                        Log.d("Piopr", "Cos z zielonym prostokatem");
 
 
                         Mat capturedFace = new Mat(photoMat, rectFace);
-                        Log.d("Piopr", "Zapisanie do mat przechwyconej twarzy");
+
                         resize(capturedFace, capturedFace, new Size(IMG_SIZE, IMG_SIZE));
-                        Log.d("Piopr", "Zmiana rozmiaru twarzy");
+
                         imwrite(f.getAbsolutePath(), capturedFace);
                         //imwrite(f.getAbsolutePath(), photoMat);
-                        Log.d("Piopr", "Zapisanie malej twarzy");
+                    }
+
                     }
 
 
                 }
                 Toast.makeText(context, "Wykryto twarze na zdjeciach.", Toast.LENGTH_SHORT).show();
-//                return null;
-//            }
-//
-//            @Override
-//            protected void onPostExecute(Void aVoid) {
-//                super.onPostExecute(aVoid);
-//                Toast.makeText(context, "Wykryto twarze na zdjeciach.", Toast.LENGTH_SHORT).show();
-//            }
-//        }.execute();
+
 
 
     }
