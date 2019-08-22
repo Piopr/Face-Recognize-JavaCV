@@ -97,7 +97,14 @@ public class TrainHelper {
                 }
             };
 
-            File[] files = photosFolder.listFiles(imageFilter);
+            FilenameFilter trainFilter = new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    return name.endsWith(".yml");
+                }
+            };
+
+            File[] files = photosFolder.listFiles(trainFilter);
 
             for (File file : files) {
                 file.delete();
@@ -134,7 +141,7 @@ public class TrainHelper {
                 File[] photos = photosFolder.listFiles(imageFilter);
                 File[] train = photosFolder.listFiles(trainFilter);
 
-                return photos != null && train != null && photos.length >= PHOTOS_TRAIN_QTY && train.length > 0;
+                return  train != null && train.length > 0;
             } else {
                 return false;
             }
