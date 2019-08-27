@@ -60,7 +60,8 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
     /**
      * Komunikat pojawiający się podczas wykrycia twarzy
      */
-    private String[] usersNamesArray = {"", "Y Know You", "Znamy sie", "Pozdrawiam", "Poka", "Marian"};
+    //private String[] usersNamesArray = {"", "Y Know You", "Znamy sie", "Pozdrawiam", "Poka", "Marian"};
+    private String[] usersNamesArray;// = TrainHelper.getUserNames();
     //private String[] usersNamesArray;/* = {"", "Y Know You", "Znamy sie", "Pozdrawiam"};*/
 
     private Integer[] usersIdArray;
@@ -132,7 +133,8 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         /*
         Zaladowanie nazw i id userow (stworzonych folderow)
          */
-        //usersNamesArray = TrainHelper.getUserNames();
+        usersNamesArray = TrainHelper.getUserNames();
+        Log.d("Piopr", "Dlugosc listy userow: " + usersNamesArray.length);
         //usersNamesArray = {"", "Y Know You", "Znamy sie", "Pozdrawiam"};
         usersIdArray = TrainHelper.getUserIds();
         for(String s : usersNamesArray)

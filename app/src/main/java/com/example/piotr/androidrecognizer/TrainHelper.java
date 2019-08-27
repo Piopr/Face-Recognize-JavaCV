@@ -249,6 +249,7 @@ public class TrainHelper {
         FaceRecognizer eigenfaces = opencv_face.EigenFaceRecognizer.create();
         FaceRecognizer fisherfaces = opencv_face.FisherFaceRecognizer.create();
         FaceRecognizer lbph = opencv_face.LBPHFaceRecognizer.create();
+
         eigenfaces.train(photos, labels);
 
         File f = new File(photosFolder, EIGEN_FACES_CLASSIFIER);
@@ -551,6 +552,10 @@ public class TrainHelper {
         return usersIds;
     }
 
+    /***
+     * Listuję liste uzytkownikow.
+     * @return Tablica stringow z nazwami uzyktownikow.
+     */
     public static String[] getUserNames(){
         File trainFolder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
         String[] users = trainFolder.list(new FilenameFilter() {
@@ -562,7 +567,16 @@ public class TrainHelper {
         for(int i =0; i<users.length; i++){
             users[i] = users[i].substring(1);
         }
-        return users;
+        Log.d("Piopr", "Dlogosc users: " + users.length);
+        String[] usersList = new String[users.length+1];
+        Log.d("Piopr", "Dlogosc usersList: " + usersList.length);
+        usersList[0] = "";
+        for(int i=0; i< users.length; i++){
+            usersList[i+1]=users[i];
+        }
+        Log.d("Piopr", "Dlogosc usersList2: " + usersList.length);
+
+        return usersList;
     }
 
     /**
