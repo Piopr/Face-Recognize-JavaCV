@@ -1,6 +1,9 @@
 <resources>
-    <string name="app_name">AndroidRecognizer</string>
+    <string name="app_name">Rozpoznawanie twarzy</string>
     <string name="permission_warning">Aby kontynuowac, prosze wlaczyc uprawnienia kamery oraz uzywanie pamieci zewnetrznej.</string>
     <string name="dismiss">Dismiss</string>
     <string name="unknown">Nieznany uzytkownik</string>
+    <string name="help_message"><b>Dodaj</b> - dodaje nowego uzytkownika.\n
+    <b>Usuń</b> - usuwa wybranego uzytkownika oraz jego dane \n
+    <b>Rozpoznaj twarz</b> -  po wybraniu uzytkownika przechodzi do kolejnego interfejsu, w którym nastąpi rozpoznawanie twarzy.</string>
 </resources>

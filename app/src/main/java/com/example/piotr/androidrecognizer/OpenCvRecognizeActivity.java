@@ -137,10 +137,10 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         Log.d("Piopr", "Dlugosc listy userow: " + usersNamesArray.length);
         //usersNamesArray = {"", "Y Know You", "Znamy sie", "Pozdrawiam"};
         usersIdArray = TrainHelper.getUserIds();
-        for(String s : usersNamesArray)
-            Log.d("Piopr", s);
-        for(Integer i : usersIdArray)
-            Log.d("Piopr", Integer.toString(i));
+//        for(String s : usersNamesArray)
+//            Log.d("Piopr", s);
+//        for(Integer i : usersIdArray)
+//            Log.d("Piopr", Integer.toString(i));
 
         /*
         wykonywanie operacji w tle
@@ -288,7 +288,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
 
     @Override
     public void onCameraViewStarted(int width, int height) {
-        absoluteFaceSize = (int) (width * 0.32f);
+        absoluteFaceSize = (int) (width * 0.2f);
     }
 
     @Override
@@ -342,6 +342,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         int y = Math.max(dadosFace.tl().y() - 10, 0);
         putText(rgbaMat, name, new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0,255,0,0));
 
+        //algorytm fisher
         faceFisher.predict(detectedFace, label, reliability);
 
          prediction = label.get(0);
@@ -354,7 +355,23 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         } else {
             name = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
         }
-        putText(rgbaMat, name, new Point(x-20, y-20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0,255,0,0));
+        putText(rgbaMat, name, new Point(x, y-20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0,255,0,0));
+
+        //algorytm LBPH
+
+        faceLBPH.predict(detectedFace, label, reliability);
+
+        prediction = label.get(0);
+        //sprawdzanie zawartosci zmiennej label
+        //Log.d("Piopr", "label.get(0): " + label.get(0));
+        acceptanceLevel = reliability.get(0);
+
+        if (prediction == -1 || acceptanceLevel >= ACCEPT_LEVEL) {
+            name = getString(R.string.unknown);
+        } else {
+            name = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
+        }
+        putText(rgbaMat, name, new Point(x, y-40), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0,255,0,0));
 
 
     }

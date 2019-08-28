@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Recognize with OpenCv godz.00:01" />
+        android:text="Rozpoznaj twarz" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -38,6 +38,7 @@
         android:id="@+id/nazwa"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:autoText="true"
         android:ems="10"
         android:inputType="textPersonName"
         android:visibility="visible" />
@@ -66,6 +67,8 @@
         android:id="@+id/sprawdz"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sprawdz" />
+        android:layout_gravity="bottom"
+        android:text="Sprawdz"
+        android:visibility="visible" />
 
 </LinearLayout>

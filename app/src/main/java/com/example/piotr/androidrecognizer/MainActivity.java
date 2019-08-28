@@ -2,6 +2,9 @@ package com.example.piotr.androidrecognizer;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -83,9 +86,13 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
+        PomocDialog dialog = new PomocDialog();
+
         sprawdzBtn = (Button) findViewById(R.id.sprawdz);
 
         sprawdzBtn.setOnClickListener(view -> {
+            dialog.show(getFragmentManager(), "Piopr");
             String wiadomosc;
             if(usersRG.getCheckedRadioButtonId()!=-1) {
                 RadioButton selected = (RadioButton) findViewById(usersRG.getCheckedRadioButtonId());
@@ -139,6 +146,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+
+
+
+
     }
 
     private void requirePermissions() {
@@ -313,3 +326,4 @@ public class MainActivity extends AppCompatActivity {
     }
 
 }
+
