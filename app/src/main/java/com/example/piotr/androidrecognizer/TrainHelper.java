@@ -81,7 +81,6 @@ public class TrainHelper {
     /**
      * obsługa przycisku reset (usunięcie wszystkich zdjęć w folderze treningu)
      * @param context
-     * @throws Exception
      */
     public static void reset(Context context) throws Exception {
         //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
@@ -256,7 +255,7 @@ public class TrainHelper {
         f.createNewFile();
        eigenfaces.save(f.getAbsolutePath());
 
-//TODO: Implement this other classifiers
+
         fisherfaces.train(photos, labels);
         f = new File(photosFolder, FISHER_FACES_CLASSIFIER);
         f.createNewFile();
@@ -297,7 +296,6 @@ public class TrainHelper {
      * @param photoNumber - numer zrobionego zdjęcia, dodawane do nazwy pliku
      * @param rgbaMat - oryginalny obrazek, przechwycony z cameraactivity
      * @param faceDetector - obiekt CascadeClassifier z pliku frontalface.xml
-     * @throws Exception
      */
     public static void takePhoto(Context context, int personId, int photoNumber, Mat rgbaMat, opencv_objdetect.CascadeClassifier faceDetector) throws Exception {
         //File folder = new File(context.getFilesDir(), TRAIN_FOLDER);
@@ -365,7 +363,6 @@ public class TrainHelper {
      * @param photoNumber - numer zrobionego zdjęcia, dodawane do nazwy pliku
      * @param rgbaMat - oryginalny obrazek, przechwycony z cameraactivity
      * @param faceDetector - obiekt CascadeClassifier z pliku frontalface.xml
-     * @throws Exception
      */
     public static void takePhotoNew(Context context, int personId, int photoNumber, Mat rgbaMat, opencv_objdetect.CascadeClassifier faceDetector, String personDirName) throws Exception {
         //File folder = new File(context.getFilesDir(), TRAIN_FOLDER);
@@ -427,7 +424,7 @@ public class TrainHelper {
      *
 
      * @param faceDetector - obiekt CascadeClassifier z pliku frontalface.xml
-     * @throws Exception
+
      */
     public static void detectFaceFromPhotos(Context context, opencv_objdetect.CascadeClassifier faceDetector, String personDirName) throws Exception {
         //File folder = new File(context.getFilesDir(), TRAIN_FOLDER);
@@ -486,6 +483,34 @@ public class TrainHelper {
 
     }
 
+
+    public static void recognizeFromPhoto(Context context, opencv_objdetect.CascadeClassifier faceDetector, String personDirName){
+
+    }
+
+    public Mat getPhotoToRecognize(Context context, String personDirName){
+        File currentFolder = new File("/mnt/sdcard/" + TRAIN_FOLDER+"/"+personDirName+"default");
+        if(!currentFolder.isDirectory() || !currentFolder.exists()){
+            Toast.makeText(context, "Folder default nie istnieje", Toast.LENGTH_SHORT).show();
+            currentFolder.mkdir();
+            return null;
+        }
+        File[] photosList = currentFolder.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                return s.endsWith(".jpg") || s.endsWith(".gif") || s.endsWith(".png");
+            }
+        });
+        if(photosList.length==0 || photosList==null){
+            Toast.makeText(context, "Brak zdjęcia do rozpoznania", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        Mat photo = imread(photosList[0].getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
+
+
+        return null;
+    }
 
     /**
      * załadowanie kaskady do detekcji twarzy, bez znaczenia dla pracy

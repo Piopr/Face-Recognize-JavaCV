@@ -235,6 +235,8 @@ public class MainActivity extends AppCompatActivity {
             username = Integer.toString(maxId+1) + username;
             File createdUser = new File(trainFolder, username);
             createdUser.mkdir();
+            File defaultFolder = new File(createdUser, "default");
+            defaultFolder.mkdir();
             makeListOfUsers();
 
 

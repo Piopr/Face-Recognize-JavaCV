@@ -306,7 +306,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
     private void capturePhoto(Mat rgbaMat) {
         try {
             //Log.d("Piopr", "qtyPhotosNew: "+TrainHelper.qtdPhotosNew());
-            TrainHelper.takePhoto(getBaseContext(), 1, TrainHelper.qtdPhotos(getBaseContext()) + 1, rgbaMat.clone(), faceDetector);
+            //TrainHelper.takePhoto(getBaseContext(), 1, TrainHelper.qtdPhotos(getBaseContext()) + 1, rgbaMat.clone(), faceDetector);
             TrainHelper.takePhotoNew(getBaseContext(), TrainHelper.CURRENT_IDUSER, TrainHelper.qtdPhotosNew() + 1, rgbaMat.clone(), faceDetector, TrainHelper.CURRENT_FOLDER);
         }catch (Exception e) {
             e.printStackTrace();
