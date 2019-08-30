@@ -235,6 +235,16 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                         }
                     }
                 });
+                findViewById(R.id.btZeZdjecia).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        try {
+                            TrainHelper.getPhotoToRecognize(getBaseContext(), TrainHelper.CURRENT_FOLDER);
+                        } catch (Exception e) {
+                            Log.d("Piopr", e.getLocalizedMessage(), e);
+                        }
+                    }
+                });
             }
         }.execute();
     }
@@ -248,11 +258,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
     @SuppressLint("StaticFieldLeak")
     void train() {
         int remainigPhotos = TrainHelper.PHOTOS_TRAIN_QTY - TrainHelper.qtdPhotos(getBaseContext());
-        if(remainigPhotos > 0) {
-            Toast.makeText(getBaseContext(), "You need more to call train: "+ remainigPhotos, Toast.LENGTH_SHORT).show();
-            Log.d("Piopr", "Test do cholery");
-            return;
-        }else if(TrainHelper.isTrained(getBaseContext())) {
+        if(TrainHelper.isTrained(getBaseContext())) {
             Toast.makeText(getBaseContext(), "Already trained", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -297,8 +303,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
     }
 
     /***
-     * wykonanie zdjęcia
-     * TODO: zmiana id odpowiednio do użytkownika
+     * wykonanie zdjęcia     *
      * @param rgbaMat - obraz przechwycony z cameraactivity
      *
      * Po wykonaniu zdjęcia zmiana takePhoto na false

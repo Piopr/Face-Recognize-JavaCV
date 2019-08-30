@@ -8,15 +8,20 @@ package com.example.piotr.androidrecognizer;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.v4.content.res.TypedArrayUtils;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
 
@@ -79,7 +84,7 @@ public class TrainHelper {
     public static int CURRENT_IDUSER;
     public static String CURRENT_FOLDER;
     /**
-     * obsługa przycisku reset (usunięcie wszystkich zdjęć w folderze treningu)
+     * obsługa przycisku reset (usuniecie plikow z algorytmem rozpoznawania)
      * @param context
      */
     public static void reset(Context context) throws Exception {
@@ -227,14 +232,43 @@ public class TrainHelper {
             }
         };
 
-        File[] files = photosFolder.listFiles(imageFilter);
+
+
+        File[] listOfUserFolders = photosFolder.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+
+                return file.isDirectory();
+            }
+        });
+
+
+        List<File> photosList = new ArrayList<File>();
+        for(File f : listOfUserFolders){
+            List<File> tmpPhotosList = Arrays.asList(f.listFiles(imageFilter));
+                photosList.addAll(tmpPhotosList);
+        }
+
+        File[] files = new File[photosList.size()];
+        int counter =0;
+        for(File f : photosList){
+            files[counter] = f;
+            counter++;
+        }
+
+        for(File f : files){
+            Log.d("Piopr", f.getAbsolutePath());
+        }
+
+        //File[] files = photosFolder.listFiles(imageFilter);
         MatVector photos = new MatVector(files.length);
         Mat labels = new Mat(files.length, 1, CV_32SC1);
         IntBuffer rotulosBuffer = labels.createBuffer();
-        int counter = 0;
+        counter = 0;
         for (File image : files) {
             Mat photo = imread(image.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
             int classe = Integer.parseInt(image.getName().split("\\.")[1]);
+            Log.d("Piopr", "Numer id: " + classe);
             resize(photo, photo, new Size(IMG_SIZE, IMG_SIZE));
             photos.put(counter, photo);
             rotulosBuffer.put(counter, classe);
@@ -249,11 +283,31 @@ public class TrainHelper {
         FaceRecognizer fisherfaces = opencv_face.FisherFaceRecognizer.create();
         FaceRecognizer lbph = opencv_face.LBPHFaceRecognizer.create();
 
-        eigenfaces.train(photos, labels);
 
+        eigenfaces.train(photos, labels);
         File f = new File(photosFolder, EIGEN_FACES_CLASSIFIER);
         f.createNewFile();
        eigenfaces.save(f.getAbsolutePath());
+
+//        // eigenfaces.g
+//       MatVector matVectofEigen = new MatVector(((opencv_face.EigenFaceRecognizer) eigenfaces).getProjections());
+//       Log.d("Piopr", "Rozmiar matVector: " + matVectofEigen.size());
+//       int size = (int) matVectofEigen.size();
+//
+//       //Mat matProjection = new Mat(size);
+//       Mat matProjection = new Mat();
+//       matProjection = matVectofEigen.get(0);
+//       Log.d("Piopr ", "matProjection rows: " + matProjection.rows()+ " cols: " +matProjection.cols());
+//
+//
+//
+//       File tmpFile = new File("/mnt/sdcard/"+TRAIN_FOLDER+"/"+CURRENT_FOLDER+"/"+"default/"+"zprojection1.jpg");
+//       imwrite(tmpFile.getAbsolutePath(), matProjection);
+//
+//       Mat matProjection2 = matVectofEigen.get(12);
+//       tmpFile = new File("/mnt/sdcard/"+TRAIN_FOLDER+"/"+CURRENT_FOLDER+"/"+"default/"+"zprojection2.jpg");
+//        imwrite(tmpFile.getAbsolutePath(), matProjection2);
+
 
 
         fisherfaces.train(photos, labels);
@@ -332,6 +386,8 @@ public class TrainHelper {
                 f.createNewFile();
                 imwrite(f.getAbsolutePath(), capturedFace);
             }
+
+
         }
     }
 
@@ -488,8 +544,13 @@ public class TrainHelper {
 
     }
 
-    public Mat getPhotoToRecognize(Context context, String personDirName){
-        File currentFolder = new File("/mnt/sdcard/" + TRAIN_FOLDER+"/"+personDirName+"default");
+    public static Mat getPhotoToRecognize(Context context, String personDirName){
+        Log.d("Piopr", "Funkcja getPhotoToRecognize");
+        File currentFolder = new File("/mnt/sdcard/" + TRAIN_FOLDER+"/"+personDirName+"/default");
+        opencv_objdetect.CascadeClassifier faceDetector;
+
+
+
         if(!currentFolder.isDirectory() || !currentFolder.exists()){
             Toast.makeText(context, "Folder default nie istnieje", Toast.LENGTH_SHORT).show();
             currentFolder.mkdir();
@@ -507,6 +568,34 @@ public class TrainHelper {
         }
 
         Mat photo = imread(photosList[0].getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
+        opencv_core.RectVector faces = new opencv_core.RectVector();
+
+        int height = photo.rows();
+        int width = photo.cols();
+        int maxFaceSize = height>width?width:height;
+        int minFaceSize = maxFaceSize/6;
+
+
+        faceDetector = loadClassifierCascade(context, R.raw.frontalface);
+        faceDetector.detectMultiScale(photo, faces, 1.25f, 3, 1,
+                new Size(minFaceSize, minFaceSize),
+                new Size(maxFaceSize, maxFaceSize));
+
+        if (faces.size() == 1) {
+            opencv_core.Rect face = faces.get(0);
+            photo = new Mat(photo, face);
+            resize(photo, photo, new Size(IMG_SIZE, IMG_SIZE));
+            imwrite(photosList[0].getAbsolutePath()+"1.jpg", photo);
+
+        } else {
+            Toast.makeText(context, "Nie wykryto twarzy na zdjęciu", Toast.LENGTH_SHORT).show();
+        }
+
+        if(!isTrained(context)) {
+            Toast.makeText(context, "Algorytm niewytrenowany", Toast.LENGTH_SHORT).show();
+        }
+
+        FaceRecognizer eigenfaces = opencv_face.EigenFaceRecognizer.create();
 
 
         return null;

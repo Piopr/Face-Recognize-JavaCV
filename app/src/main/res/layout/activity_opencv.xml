@@ -37,6 +37,15 @@
         android:layout_marginBottom="50dp"
         />
 
+    <Button
+        android:id="@+id/btZeZdjecia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ze zdjecia"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="100dp"
+        />
+
 
 
 
