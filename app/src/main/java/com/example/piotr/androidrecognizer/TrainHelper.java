@@ -7,9 +7,7 @@
 package com.example.piotr.androidrecognizer;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.SystemClock;
-import android.support.v4.content.res.TypedArrayUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -27,7 +25,6 @@ import java.util.List;
 import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
 
 import org.bytedeco.javacpp.indexer.IntBufferIndexer;
-import org.bytedeco.javacpp.indexer.UByteBufferIndexer;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.MatVector;
@@ -418,27 +415,22 @@ public class TrainHelper {
             counter++;
         }
 
-        Log.d("Piopr", "Jeden");
-        int NUM_EIGEN_FACES = 14;
-        Size imgsize = photos.get(0).size();
-        Mat meanFaces = new Mat(photos);
-        opencv_core.PCA pca = new opencv_core.PCA(meanFaces, new Mat(), opencv_core.PCA.DATA_AS_ROW, 14);
-        Mat averageFace = pca.mean().reshape(1, imgsize.height());
-        Mat eigenVectors = pca.eigenvectors();
-
-        Log.d("Piopr", "Dwa");
+        FaceRecognizer eigenfaces = opencv_face.EigenFaceRecognizer.create();
+        FaceRecognizer fisherfaces = opencv_face.FisherFaceRecognizer.create();
+        FaceRecognizer lbph = opencv_face.LBPHFaceRecognizer.create();
 
 
-        for (int i = 0; i < NUM_EIGEN_FACES; i++) {
-            Mat eigenFace = eigenVectors.row(i).reshape(1, imgsize.height());
-            eigenFace.push_back(eigenFace);
+        File f = new File(photosFolder, EIGEN_FACES_CLASSIFIER);
+        if(f.exists()){
+            eigenfaces.read(f.getAbsolutePath());
         }
 
-        Log.d("Piopr", "Trzy");
-        Mat output = new Mat();
-        resize(averageFace, output, new Size(160, 160));
-        File tmpFile = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + CURRENT_FOLDER + "/" + "default/" + "mean1.jpg");
-        imwrite(tmpFile.getAbsolutePath(), output);
+       Mat eigenValues = ((opencv_face.EigenFaceRecognizer) eigenfaces).getEigenValues();
+       Mat eigenVectors = ((opencv_face.EigenFaceRecognizer) eigenfaces).getEigenVectors();
+       Mat mean = ((opencv_face.EigenFaceRecognizer) eigenfaces).getMean();
+
+        File tmpFile = new File("/mnt/sdcard/"+TRAIN_FOLDER+"/"+CURRENT_FOLDER+"/"+"visualizations/"+"mean.jpg");
+        imwrite(tmpFile.getAbsolutePath(), mean.reshape(1, photos.get(0).rows()));
     }
 
 

@@ -2,9 +2,6 @@ package com.example.piotr.androidrecognizer;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -14,6 +11,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -22,20 +20,15 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.IntSummaryStatistics;
-import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     private boolean mPermissionReady; //zmienna do kontroli nadanych uprawnien
     private RadioGroup usersRG;
-    private Button sprawdzBtn;
-    private Button dodajBtn;
-    private Button usunBtn;
+
     //TODO: przekazywanie id uzytkownika do nastepnego activity, wybranie folderu w ktorym beda przechowywane zdjecia
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.d("Piopr", "dzialaj no");
 
-
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_main); //ustawienie widoku
 
         int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA); //jesli nadano: 0, jesli nie: -1
@@ -89,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
         PomocDialog dialog = new PomocDialog();
 
-        sprawdzBtn = (Button) findViewById(R.id.sprawdz);
+        Button sprawdzBtn = (Button) findViewById(R.id.sprawdz);
 
         sprawdzBtn.setOnClickListener(view -> {
             dialog.show(getFragmentManager(), "Piopr");
@@ -108,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         makeListOfUsers();
 
 
-        dodajBtn = (Button) findViewById(R.id.dodaj);
+        Button dodajBtn = (Button) findViewById(R.id.dodaj);
         dodajBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -131,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        usunBtn = (Button) findViewById(R.id.usun);
+        Button usunBtn = (Button) findViewById(R.id.usun);
         usunBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -237,6 +230,8 @@ public class MainActivity extends AppCompatActivity {
             createdUser.mkdir();
             File defaultFolder = new File(createdUser, "default");
             defaultFolder.mkdir();
+            File eigenFolder = new File(createdUser, "visualizations");
+            eigenFolder.mkdir();
             makeListOfUsers();
 
 

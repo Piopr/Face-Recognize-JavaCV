@@ -43,7 +43,6 @@ import org.bytedeco.javacv.FFmpegFrameFilter;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameFilter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.opencv.imgcodecs.Imgcodecs;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
