@@ -46,6 +46,15 @@
         android:layout_marginBottom="100dp"
         />
 
+    <Button
+        android:id="@+id/btMean"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Srednia"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="150dp"
+        />
+
 
 
 
