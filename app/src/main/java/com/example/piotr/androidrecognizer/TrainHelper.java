@@ -24,7 +24,9 @@ import java.util.List;
 
 import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.indexer.IntBufferIndexer;
+import org.bytedeco.javacpp.indexer.IntRawIndexer;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.MatVector;
@@ -32,9 +34,27 @@ import org.bytedeco.javacpp.opencv_core.Size;
 import org.bytedeco.javacpp.opencv_face;
 import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
 import org.bytedeco.javacpp.opencv_objdetect;
+import org.opencv.core.Range;
 
 
+import static org.bytedeco.javacpp.opencv_core.CV_8U;
+import static org.bytedeco.javacpp.opencv_core.CV_8UC1;
+import static org.bytedeco.javacpp.opencv_core.GEMM_2_T;
+import static org.bytedeco.javacpp.opencv_core.NORM_MINMAX;
+import static org.bytedeco.javacpp.opencv_core.PCACompute;
+import static org.bytedeco.javacpp.opencv_core.PCACompute2;
+import static org.bytedeco.javacpp.opencv_core.add;
+import static org.bytedeco.javacpp.opencv_core.gemm;
+import static org.bytedeco.javacpp.opencv_core.noArray;
+import static org.bytedeco.javacpp.opencv_core.normalize;
+import static org.bytedeco.javacpp.opencv_core.read;
+import static org.bytedeco.javacpp.opencv_core.shiftLeft;
+import static org.bytedeco.javacpp.opencv_core.subtract;
+import static org.bytedeco.javacpp.opencv_core.transpose;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
+import static org.bytedeco.javacpp.opencv_imgproc.COLOR_GRAY2BGR;
+import static org.bytedeco.javacpp.opencv_imgproc.COLOR_GRAY2BGRA;
+import static org.bytedeco.javacpp.opencv_imgproc.COLOR_GRAY2RGB;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
@@ -280,7 +300,8 @@ public class TrainHelper {
             rotulosBuffer.put(counter, classe);
             counter++;
         }
-        IntBufferIndexer idBuffer = labels.createIndexer();
+
+        IntRawIndexer idBuffer = labels.createIndexer();
 
 
 //        FaceRecognizer eigenfaces = createEigenFaceRecognizer();
@@ -297,47 +318,6 @@ public class TrainHelper {
         f.createNewFile();
         eigenfaces.save(f.getAbsolutePath());
 
-//       Mat eigenValues = ((opencv_face.EigenFaceRecognizer) eigenfaces).getEigenValues();
-//       Mat eigenVectors = ((opencv_face.EigenFaceRecognizer) eigenfaces).getEigenVectors();
-//       Mat mean = ((opencv_face.EigenFaceRecognizer) eigenfaces).getMean();
-
-//        File tmpFile = new File("/mnt/sdcard/"+TRAIN_FOLDER+"/"+CURRENT_FOLDER+"/"+"default/"+"mean.jpg");
-//        imwrite(tmpFile.getAbsolutePath(), mean.reshape(1, photos.get(0).rows()));
-//        tmpFile = new File("/mnt/sdcard/"+TRAIN_FOLDER+"/"+CURRENT_FOLDER+"/"+"default/"+"eigenVectors.jpg");
-//        Mat output = eigenVectors.reshape(1, photos.get(0).rows());
-//        Log.d("Piopr", "Channels: "+ output.channels());
-        //cvtColor(output, output, CV_IMWRITE_PAM_FORMAT_GRAYSCALE);
-        //imwrite(tmpFile.getAbsolutePath(), output);
-
-
-//        // eigenfaces.g
-//       MatVector matVectofEigen = new MatVector(((opencv_face.EigenFaceRecognizer) eigenfaces).getProjections());
-//        MatVector matVectofEigen2 = ((opencv_face.EigenFaceRecognizer) eigenfaces).getProjections();
-//
-//       //Mat matProjection = new Mat(size);
-//       Mat matProjection = new Mat();
-//       matProjection = matVectofEigen2.get(0);
-//       Log.d("Piopr ", "matProjection rows: " + matProjection.rows()+ " cols: " +matProjection.cols());
-//       Log.d("Piopr", "mat: " + matProjection.toString());
-//       Log.d("Piopr", "mat: " + matProjection);
-
-//        Mat meanEigen = ((opencv_face.EigenFaceRecognizer) eigenfaces).getMean();
-//        Mat newMat = new Mat();
-//        resize(meanEigen, newMat, new Size(160, 160));
-//        File tmpFile = new File("/mnt/sdcard/"+TRAIN_FOLDER+"/"+CURRENT_FOLDER+"/"+"default/"+"mean1.jpg");
-//        imwrite(tmpFile.getAbsolutePath(), newMat);
-//        //cv2
-//
-
-//
-//
-//
-//       File tmpFile = new File("/mnt/sdcard/"+TRAIN_FOLDER+"/"+CURRENT_FOLDER+"/"+"default/"+"zprojection1.jpg");
-//       imwrite(tmpFile.getAbsolutePath(), matProjection);
-//
-//       Mat matProjection2 = matVectofEigen.get(12);
-//       tmpFile = new File("/mnt/sdcard/"+TRAIN_FOLDER+"/"+CURRENT_FOLDER+"/"+"default/"+"zprojection2.jpg");
-//        imwrite(tmpFile.getAbsolutePath(), matProjection2);
 
 
         if (checkCouplePersonsExists(idBuffer)) {
@@ -345,24 +325,119 @@ public class TrainHelper {
             f = new File(photosFolder, FISHER_FACES_CLASSIFIER);
             f.createNewFile();
             fisherfaces.save(f.getAbsolutePath());
-        } else {
-            Toast.makeText(context, "Aby wytrenować algorytm Fisherfaces potrzeba przynajmniej dwóch zestawow zdjec", Toast.LENGTH_SHORT).show();
-
         }
 
-        SystemClock.sleep(900);
+
 
         lbph.train(photos, labels);
         f = new File(photosFolder, LBPH_CLASSIFIER);
         f.createNewFile();
         lbph.save(f.getAbsolutePath());
 
-
         return true;
     }
 
+    public static void testMeanFaces(Context context) throws Exception {
+        File visPath = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + CURRENT_FOLDER + "/" + "visualizations/");
+        if(!visPath.exists()){
+            visPath.mkdir();
+        }
 
-    public static void makeMeanOfEigens(Context context) throws Exception {
+        FilenameFilter imageFilter = new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".jpg") || name.endsWith(".gif") || name.endsWith(".png");
+            }
+        };
+
+        File userphotosFolder = new File("/mnt/sdcard/"+TRAIN_FOLDER, CURRENT_FOLDER);
+        File[] files = userphotosFolder.listFiles(imageFilter);
+        if(files.length<1){
+            Log.d("Piopr", "Brak zdjec!");
+            return;
+        }
+
+        MatVector photos = new opencv_core.MatVector(files.length+1);
+        Mat labels = new opencv_core.Mat(files.length+1, 1, CV_32SC1);
+        IntBuffer rotulosBuffer = labels.createBuffer();
+        int counter = 0;
+
+        for (File image : files) {
+            Mat photo = imread(image.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
+            int classe = Integer.parseInt(image.getName().split("\\.")[1]);
+            Log.d("Piopr", "Numer id: " + classe);
+
+            resize(photo, photo, new opencv_core.Size(IMG_SIZE, IMG_SIZE));
+            photos.put(counter, photo);
+
+            rotulosBuffer.put(counter, classe);
+            counter++;
+        }
+        photos.put(counter, imread(files[0].getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE));
+        rotulosBuffer.put(counter, Integer.parseInt(files[0].getName().split("\\.")[1])+1);
+
+
+
+        opencv_face.FaceRecognizer eigenfaces = opencv_face.EigenFaceRecognizer.create();
+        opencv_face.FaceRecognizer fisherfaces = opencv_face.FisherFaceRecognizer.create();
+        opencv_face.FaceRecognizer lbph = opencv_face.LBPHFaceRecognizer.create();
+
+        eigenfaces.train(photos, labels);
+
+        Mat eigenVectors = ((opencv_face.EigenFaceRecognizer) eigenfaces).getEigenVectors();
+        Mat eigenMean = ((opencv_face.EigenFaceRecognizer) eigenfaces).getMean();
+
+        for (int i = 0; i < files.length; i++) {
+            Mat wektorek = eigenVectors.col(i);
+            transpose(wektorek, wektorek);
+            Mat output = wektorek.reshape(1, 160);
+            normalize(output, output, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
+            imwrite(visPath + "/eigenVec" + i + ".jpg", output);
+        }
+
+        eigenMean = eigenMean.reshape(1,IMG_SIZE);
+        imwrite(visPath + "/meanEigen.jpg", eigenMean);
+
+
+
+        fisherfaces.train(photos, labels);
+
+        Mat fisherVectors = ((opencv_face.FisherFaceRecognizer) fisherfaces).getEigenVectors();
+        Mat fisherMean = ((opencv_face.FisherFaceRecognizer) fisherfaces).getMean();
+
+        Log.d("Piopr", "Fisher cols: " + fisherVectors.cols());
+
+//        for (int i = 0; i < files.length; i++) {
+//            Mat wektorek = fisherVectors.col(i);
+//            transpose(wektorek, wektorek);
+//            Mat output = wektorek.reshape(1, 160);
+//            normalize(output, output, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
+//            imwrite(visPath + "/fisherVec" + i + ".jpg", output);
+
+        fisherVectors = fisherVectors.reshape(1,160);
+        normalize(fisherVectors, fisherVectors, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
+        imwrite(visPath + "/fisherVec.jpg", fisherVectors);
+
+        fisherMean = eigenMean.reshape(1,IMG_SIZE);
+        imwrite(visPath + "/meanfisher.jpg", fisherMean);
+
+
+        //Mat
+
+        lbph.train(photos,labels);
+
+        MatVector histo = ((opencv_face.LBPHFaceRecognizer) lbph).getHistograms();
+        Log.d("Piopr", "Histo rows: " + histo.get(0).rows());
+        Log.d("Piopr", "Histo cols: " + histo.get(0).cols());
+        Log.d("Piopr", "Histo total: " + histo.get(0).total());
+        Log.d("Piopr", "Histo size: " + histo.size());
+        Mat output = histo.get(0);
+        normalize(output, output, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
+        imwrite(visPath+"/histo.jpg", histo.get(0).reshape(1,128));
+    }
+
+
+    public static void makeMeanFaces(Context context) throws Exception {
         File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
         if (!photosFolder.exists()) return;
 
@@ -400,20 +475,42 @@ public class TrainHelper {
             Log.d("Piopr", f.getAbsolutePath());
         }
 
+
+
         //File[] files = photosFolder.listFiles(imageFilter);
         MatVector photos = new MatVector(files.length);
         Mat labels = new Mat(files.length, 1, CV_32SC1);
         IntBuffer rotulosBuffer = labels.createBuffer();
         counter = 0;
+
+
         for (File image : files) {
             Mat photo = imread(image.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
             int classe = Integer.parseInt(image.getName().split("\\.")[1]);
             Log.d("Piopr", "Numer id: " + classe);
+
             resize(photo, photo, new Size(IMG_SIZE, IMG_SIZE));
             photos.put(counter, photo);
+
             rotulosBuffer.put(counter, classe);
             counter++;
         }
+
+        File userphotosFolder = new File("/mnt/sdcard/"+TRAIN_FOLDER, CURRENT_FOLDER);
+        File[] userFiles = userphotosFolder.listFiles(imageFilter);
+        Mat data = new Mat();
+        for (File image : userFiles) {
+            Mat photo = imread(image.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
+            Mat tmp = photo.reshape(1, 1);
+            data.push_back(tmp);
+//            Log.d("Piopr", "Userfiles: " + image.getAbsolutePath());
+            counter++;
+        }
+
+
+        Log.d("Piopr", "Photos2 cols: " + data.cols());
+        Log.d("Piopr", "Photos2 rows: " + data.rows());
+
 
         FaceRecognizer eigenfaces = opencv_face.EigenFaceRecognizer.create();
         FaceRecognizer fisherfaces = opencv_face.FisherFaceRecognizer.create();
@@ -421,16 +518,139 @@ public class TrainHelper {
 
 
         File f = new File(photosFolder, EIGEN_FACES_CLASSIFIER);
-        if(f.exists()){
+        if (f.exists()) {
             eigenfaces.read(f.getAbsolutePath());
+
+            File visPath = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + CURRENT_FOLDER + "/" + "visualizations/");
+            if(!visPath.exists()){
+                visPath.mkdir();
+            }
+
+            Mat eigenValues = ((opencv_face.EigenFaceRecognizer) eigenfaces).getEigenValues();
+            Mat eigenVectors = ((opencv_face.EigenFaceRecognizer) eigenfaces).getEigenVectors();
+            Mat mean = ((opencv_face.EigenFaceRecognizer) eigenfaces).getMean();
+            MatVector projections = ((opencv_face.EigenFaceRecognizer) eigenfaces).getProjections();
+            Log.d("Piopr", "EigenVectors kurwancka cols: " +eigenVectors.cols());
+
+//            for(int i = 0; i<files.length;i++){
+//                Mat wektorek = eigenVectors.col(i);
+//                transpose(wektorek, wektorek);
+//                Mat output= wektorek.reshape(1,160);
+//                normalize(output, output, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
+//                imwrite(visPath+"/wekt"+i+".jpg", output);
+//            }
+
+
+
+
+            int n = data.rows();
+            int d = data.cols();
+            int _numcomponents = userFiles.length;
+
+            opencv_core.PCA pca = new opencv_core.PCA(data, new Mat(), opencv_core.PCA.DATA_AS_ROW, _numcomponents);
+            Mat _mean = pca.mean();
+            Mat output = _mean.reshape(1,160);
+
+            imwrite(visPath+"/_mean3.jpg", output);
+            output.close();
+
+            _mean = _mean.reshape(1,1);
+
+            Mat _eigenvalues = pca.eigenvalues().clone();
+            Mat _eigenvectors = pca.eigenvectors();
+            transpose(_eigenvectors, _eigenvectors);
+
+            Mat X = new Mat();
+            Mat  Y = new Mat();
+            data.convertTo(X, _eigenvectors.type());
+
+
+
+            for(int i =0; i<_numcomponents; i++){
+                Mat ev = _eigenvectors.col(i).clone();
+                ev =  ev.reshape(1,160);
+                Mat ingray = new Mat();
+                normalize(ev, ingray, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
+                imwrite(visPath+"/matvec"+i+".jpg", ingray);
+            }
+
+            if(_eigenvectors.rows() != d) {
+                Log.d("Piopr", "Costam nietak");
+            }
+            if(!_mean.empty() && (mean.total() != d)) {
+                Log.d("Piopr", "Costam nietak2");
+            }
+
+            if(!_mean.empty()){
+                for(int i=0; i<n; i++){
+                    Mat r_i = X.row(i);
+                    subtract(r_i, _mean.reshape(1,1), r_i);
+                }
+            }
+            // finally calculate projection as Y = (X-mean)*W
+            gemm(X, _eigenvectors, 1.0, new Mat(), 0.0, Y);
+
+
+            imwrite(visPath+"/projection.jpg", Y);
+
+
+
+            int nn = Y.rows();
+            int dd = Y.cols();
+
+            if(_eigenvectors.cols() != dd) {
+                Log.d("Piopr", "Cos jest nietak1");
+            }
+
+            if(!_mean.empty() && (_mean.total() != _eigenvectors.rows())) {
+                Log.d("Piopr", "cos jest nietak2");
+            }
+
+            Mat XX = new Mat();
+            Mat YY = new Mat();
+            Y.convertTo(YY, _eigenvectors.type());
+            gemm(YY, _eigenvectors, 1.0, new Mat(), 0.0, XX, GEMM_2_T);
+
+            if(!_mean.empty()) {
+                for(int i=0; i<n; i++) {
+                    Mat r_i = X.row(i);
+                    add(r_i, _mean.reshape(1,1), r_i);
+                }
+            }
+            Mat output2 = XX.reshape(1,160);
+
+            imwrite(visPath+"/reconstr.jpg", output2);
+
+
+
+
+
+
         }
 
-       Mat eigenValues = ((opencv_face.EigenFaceRecognizer) eigenfaces).getEigenValues();
-       Mat eigenVectors = ((opencv_face.EigenFaceRecognizer) eigenfaces).getEigenVectors();
-       Mat mean = ((opencv_face.EigenFaceRecognizer) eigenfaces).getMean();
+        //
 
-        File tmpFile = new File("/mnt/sdcard/"+TRAIN_FOLDER+"/"+CURRENT_FOLDER+"/"+"visualizations/"+"mean.jpg");
-        imwrite(tmpFile.getAbsolutePath(), mean.reshape(1, photos.get(0).rows()));
+
+
+
+
+
+        f = new File(photosFolder, FISHER_FACES_CLASSIFIER);
+        if (f.exists()) {
+            fisherfaces.read(f.getAbsolutePath());
+
+            Mat mean2 = ((opencv_face.FisherFaceRecognizer) fisherfaces).getMean();
+            File tmpFile = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + CURRENT_FOLDER + "/" + "visualizations/" + "meanEigen.jpg");
+            imwrite(tmpFile.getAbsolutePath(), mean2.reshape(1, photos.get(0).rows()));
+
+            Mat fisherVectors = ((opencv_face.FisherFaceRecognizer) fisherfaces).getEigenVectors();
+            Log.d("Piopr", "Fisher rows"+fisherVectors.rows());
+            Log.d("Piopr", "Fisher cols"+fisherVectors.cols());
+
+            tmpFile = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + CURRENT_FOLDER + "/" + "visualizations/" + "meanEigen2.jpg");
+            imwrite(tmpFile.getAbsolutePath(), fisherVectors.reshape(1, 160));
+        }
+
     }
 
 
@@ -477,7 +697,7 @@ public class TrainHelper {
 
         cvtColor(rgbaMat, greyMat, CV_BGR2GRAY);
         opencv_core.RectVector detectedFaces = new opencv_core.RectVector();
-        faceDetector.detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
+        faceDetector.detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(160, 160), new Size(500, 500));
         for (int i = 0; i < detectedFaces.size(); i++) {
             Log.d("Piopr", "Wykonanie petli nr das das :  " + 1);
             Log.d("Piopr", "detectedFaces :  " + detectedFaces.get(0));
@@ -543,7 +763,7 @@ public class TrainHelper {
 
         cvtColor(rgbaMat, greyMat, CV_BGR2GRAY);
         opencv_core.RectVector detectedFaces = new opencv_core.RectVector();
-        faceDetector.detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
+        faceDetector.detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(160, 160), new Size(500, 500));
         for (int i = 0; i < detectedFaces.size(); i++) {
             //TODO: zmiana funkcji, by zapisywała zdjęcia w odpowiednim folderze, obsłużenie parametru personDirName, poprawa metody qtdPhotos
 
@@ -838,9 +1058,9 @@ public class TrainHelper {
 
         File[] allPhotosArray = currentFolder.listFiles(imageFilter);
         int i = 0;
-        for (File f : allPhotosArray){
+        for (File f : allPhotosArray) {
             i++;
-            File name = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + TrainHelper.CURRENT_FOLDER, "tmp"+i+".jpg");
+            File name = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + TrainHelper.CURRENT_FOLDER, "tmp" + i + ".jpg");
             f.renameTo(name);
         }
 
@@ -875,7 +1095,7 @@ public class TrainHelper {
      * @return true: jeśli istnieje wiecej, niż jeden,  false: jeśli tylko jeden zestaw zdjęć
      *
      */
-    public static boolean checkCouplePersonsExists(IntBufferIndexer idBuffer) {
+    public static boolean checkCouplePersonsExists(IntRawIndexer idBuffer) {
         int valueToCompare = idBuffer.get(0, 0);
         for (int i = 0; i < idBuffer.rows(); i++) {
             if (valueToCompare != idBuffer.get(i, 0))

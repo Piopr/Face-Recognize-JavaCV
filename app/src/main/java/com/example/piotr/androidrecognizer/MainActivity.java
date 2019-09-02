@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
             createdUser.mkdir();
             File defaultFolder = new File(createdUser, "default");
             defaultFolder.mkdir();
-            File eigenFolder = new File(createdUser, "visualizations");
+            File eigenFolder = new File(createdUser, "eigen");
             eigenFolder.mkdir();
             makeListOfUsers();
 

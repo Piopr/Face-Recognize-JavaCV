@@ -12,7 +12,6 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
-
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.opencv_face;
@@ -20,12 +19,12 @@ import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.Point;
 import org.bytedeco.javacpp.opencv_core.RectVector;
 import org.bytedeco.javacpp.opencv_core.Size;
-
 import java.io.File;
 
 import static com.example.piotr.androidrecognizer.TrainHelper.FISHER_EXISTS;
 import static com.example.piotr.androidrecognizer.TrainHelper.checkFisherExists;
-import static com.example.piotr.androidrecognizer.TrainHelper.makeMeanOfEigens;
+import static com.example.piotr.androidrecognizer.TrainHelper.makeMeanFaces;
+import static com.example.piotr.androidrecognizer.TrainHelper.testMeanFaces;
 import static org.bytedeco.javacpp.opencv_core.FONT_HERSHEY_PLAIN;
 import static org.bytedeco.javacpp.opencv_core.LINE_8;
 import static org.bytedeco.javacpp.opencv_core.Mat;
@@ -41,15 +40,15 @@ import static com.example.piotr.androidrecognizer.TrainHelper.ACCEPT_LEVEL;
 
 /**
  * Struktura plikow:
- * mnt/sdcard/trainfolder
- * ---1user/
- * --person.id.numberofphoto.jpg
- * --person.1.2.jpg
- * --person.1.3.jpg
- * ---2admin
- * --person.2.1.jpg
- * --person.2.2.jpg
- * ---eigenFacesClassifier.yml
+ *      mnt/sdcard/trainfolder
+ *      ---1user/
+ *              --person.id.numberofphoto.jpg
+ *              --person.1.2.jpg
+ *              --person.1.3.jpg
+ *      ---2admin
+ *              --person.2.1.jpg
+ *              --person.2.2.jpg
+ *      ---eigenFacesClassifier.yml
  */
 
 /**
@@ -93,6 +92,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
     opencv_face.FaceRecognizer faceLBPH = opencv_face.LBPHFaceRecognizer.create();
 
 
+
     /**
      * jesli już nauczono twarzy (istnieje plik .yml) zmienia się na true i można zacząć rozpoznawanie twarzy
      */
@@ -112,8 +112,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         }
         return true;
     }
-
-    //
+//
     /*
     Przy tworzeniu activity
      */
@@ -126,9 +125,9 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         Sprawdzanie uprawnien czytania i pisania
          */
         if (Build.VERSION.SDK_INT >= 23) {
-            String[] PERMISSIONS = {android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            String[] PERMISSIONS = {android.Manifest.permission.READ_EXTERNAL_STORAGE,android.Manifest.permission.WRITE_EXTERNAL_STORAGE};
             if (!hasPermissions(this, PERMISSIONS)) {
-                ActivityCompat.requestPermissions(this, PERMISSIONS, 1);
+                ActivityCompat.requestPermissions(this, PERMISSIONS, 1 );
             }
         }
         /*
@@ -152,7 +151,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         /*
         wykonywanie operacji w tle
          */
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<Void,Void,Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
                 try {
@@ -167,23 +166,23 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                      *
                      * na razie tylko do obsłubi EIGEN_FACES
                      */
-                    if (TrainHelper.isTrained(getBaseContext())) {
+                    if(TrainHelper.isTrained(getBaseContext())) {
                         //File folder = new File(getFilesDir(), TrainHelper.TRAIN_FOLDER);
                         File folder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
                         File f = new File(folder, TrainHelper.EIGEN_FACES_CLASSIFIER);
                         faceRecognizer.read(f.getAbsolutePath());
                         TrainHelper.FISHER_EXISTS = TrainHelper.checkFisherExists();
-                        if (FISHER_EXISTS) {
+                        if(FISHER_EXISTS) {
 
                             f = new File(folder, TrainHelper.FISHER_FACES_CLASSIFIER);
                             faceFisher.read(f.getAbsolutePath());
                         }
 
-                        f = new File(folder, TrainHelper.LBPH_CLASSIFIER);
+                         f = new File(folder, TrainHelper.LBPH_CLASSIFIER);
                         faceLBPH.read(f.getAbsolutePath());
                         trained = true;
                     }
-                } catch (Exception e) {
+                }catch (Exception e) {
                     Log.d(TAG, e.getLocalizedMessage(), e);
                 }
                 return null;
@@ -207,7 +206,13 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                 findViewById(R.id.btTrain).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        train();
+                        try {
+                            train();
+                        } catch (Exception e){
+                            Log.d("Piopr", e.getLocalizedMessage(), e);
+                        }
+
+
                     }
                 });
                 /***
@@ -220,21 +225,9 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                             TrainHelper.reset(getBaseContext());
                             Toast.makeText(getBaseContext(), "Reseted with sucess.", Toast.LENGTH_SHORT).show();
                             finish();
-                        } catch (Exception e) {
+                        }catch (Exception e) {
                             Log.d(TAG, e.getLocalizedMessage(), e);
                         }
-                    }
-                });
-
-
-                /**
-                 * Przygotowanie oryginalnych zdjec do przetworzenia
-                 */
-                findViewById(R.id.btPrzygotuj).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        TrainHelper.renamePhotos();
-                        //TrainHelper.listPhotos();
                     }
                 });
 
@@ -264,21 +257,31 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                     @Override
                     public void onClick(View view) {
                         try {
-                            makeMeanOfEigens(getBaseContext());
+                            //makeMeanFaces(getBaseContext());
+                            testMeanFaces(getBaseContext());
                         } catch (Exception e) {
                             Log.d("Piopr", e.getLocalizedMessage(), e);
                         }
                     }
                 });
 
-                if (!checkFisherExists()) {
-                    Toast.makeText(getBaseContext(), "Aby wytrenować algorytm Fisherfaces potrzeba przynajmniej dwóch zestawow zdjec", Toast.LENGTH_SHORT).show();
+                if(!checkFisherExists()){
+                    Toast.makeText(getBaseContext(),"Aby wytrenować algorytm Fisherfaces potrzeba przynajmniej dwóch zestawow zdjec", Toast.LENGTH_SHORT).show();
                 }
 
             }
         }.execute();
 
-
+        /**
+         * Przygotowanie oryginalnych zdjec do przetworzenia
+         */
+        findViewById(R.id.btPrzygotuj).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TrainHelper.renamePhotos();
+                //TrainHelper.listPhotos();
+            }
+        });
     }
 
     /***
@@ -290,7 +293,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
     @SuppressLint("StaticFieldLeak")
     void train() {
         int remainigPhotos = TrainHelper.PHOTOS_TRAIN_QTY - TrainHelper.qtdPhotos(getBaseContext());
-        if (TrainHelper.isTrained(getBaseContext())) {
+        if(TrainHelper.isTrained(getBaseContext())) {
             Toast.makeText(getBaseContext(), "Already trained", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -300,11 +303,11 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
 
             @Override
             protected Void doInBackground(Void... voids) {
-                try {
-                    if (!TrainHelper.isTrained(getBaseContext())) {
+                try{
+                    if(!TrainHelper.isTrained(getBaseContext())) {
                         TrainHelper.train(getBaseContext());
                     }
-                } catch (Exception e) {
+                }catch (Exception e) {
                     Log.d(TAG, e.getLocalizedMessage(), e);
                     Log.d("Piopr", e.getLocalizedMessage(), e);
                 }
@@ -315,9 +318,9 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
                 try {
-                    Toast.makeText(getBaseContext(), "Reseting after train - Sucess : " + TrainHelper.isTrained(getBaseContext()), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), "Reseting after train - Sucess : "+ TrainHelper.isTrained(getBaseContext()), Toast.LENGTH_SHORT).show();
                     finish();
-                } catch (Exception e) {
+                }catch (Exception e) {
                     Log.d(TAG, e.getLocalizedMessage(), e);
                 }
             }
@@ -345,7 +348,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
             //Log.d("Piopr", "qtyPhotosNew: "+TrainHelper.qtdPhotosNew());
             //TrainHelper.takePhoto(getBaseContext(), 1, TrainHelper.qtdPhotos(getBaseContext()) + 1, rgbaMat.clone(), faceDetector);
             TrainHelper.takePhotoNew(getBaseContext(), TrainHelper.CURRENT_IDUSER, TrainHelper.qtdPhotosNew() + 1, rgbaMat.clone(), faceDetector, TrainHelper.CURRENT_FOLDER);
-        } catch (Exception e) {
+        }catch (Exception e) {
             e.printStackTrace();
         }
         takePhoto = false;
@@ -359,12 +362,14 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
      */
     private void recognize(opencv_core.Rect dadosFace, Mat grayMat, Mat rgbaMat) {
         Mat detectedFace = new Mat(grayMat, dadosFace);
-        resize(detectedFace, detectedFace, new Size(TrainHelper.IMG_SIZE, TrainHelper.IMG_SIZE));
+        resize(detectedFace, detectedFace, new Size(TrainHelper.IMG_SIZE,TrainHelper.IMG_SIZE));
 
         IntPointer label = new IntPointer(1);
         DoublePointer reliability = new DoublePointer(1);
         faceRecognizer.predict(detectedFace, label, reliability);
         int prediction = label.get(0);
+
+
         //sprawdzanie zawartosci zmiennej label
         //Log.d("Piopr", "label.get(0): " + label.get(0));
         double acceptanceLevel = reliability.get(0);
@@ -377,10 +382,10 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         }
         int x = Math.max(dadosFace.tl().x() - 10, 0);
         int y = Math.max(dadosFace.tl().y() - 10, 0);
-        putText(rgbaMat, name, new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0, 255, 0, 0));
+        putText(rgbaMat, name, new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0,255,0,0));
 
 
-        if (checkFisherExists()) {
+        if(checkFisherExists()) {
             //algorytm fisher
             faceFisher.predict(detectedFace, label, reliability);
 
@@ -414,7 +419,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         } else {
             name = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
         }
-        putText(rgbaMat, name, new Point(x, y - 40), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0, 255, 0, 0));
+        putText(rgbaMat, name, new Point(x, y-40), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0,255,0,0));
 
 
     }
@@ -431,7 +436,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
     void noTrainedLabel(opencv_core.Rect face, Mat rgbaMat) {
         int x = Math.max(face.tl().x() - 10, 0);
         int y = Math.max(face.tl().y() - 10, 0);
-        putText(rgbaMat, "No trained or train unavailable", new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0, 255, 0, 0));
+        putText(rgbaMat, "No trained or train unavailable", new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0,255,0,0));
     }
 
     @Override
@@ -446,13 +451,13 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
 
             if (faces.size() == 1) {
                 showDetectedFace(faces, rgbaMat);
-                if (takePhoto) {
+                if(takePhoto) {
                     capturePhoto(rgbaMat);
                     alertRemainingPhotos();
                 }
-                if (trained) {
+                if(trained) {
                     recognize(faces.get(0), greyMat, rgbaMat);
-                } else {
+                }else{
                     noTrainedLabel(faces.get(0), rgbaMat);
                 }
             }
@@ -466,7 +471,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
             @Override
             public void run() {
                 int remainigPhotos = TrainHelper.PHOTOS_TRAIN_QTY - TrainHelper.qtdPhotos(getBaseContext());
-                Toast.makeText(getBaseContext(), "You need more to call train: " + remainigPhotos, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), "You need more to call train: "+ remainigPhotos, Toast.LENGTH_SHORT).show();
             }
         });
     }
