@@ -329,7 +329,11 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
 
     @Override
     public void onCameraViewStarted(int width, int height) {
-        absoluteFaceSize = (int) (width * 0.2f);
+        if((int) (width * 0.2f)>160){
+            absoluteFaceSize = (int) (width * 0.2f);
+        } else {
+            absoluteFaceSize = 160;
+        }
     }
 
     @Override
