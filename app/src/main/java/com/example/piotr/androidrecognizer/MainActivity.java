@@ -83,10 +83,11 @@ public class MainActivity extends AppCompatActivity {
         PomocDialog dialog = new PomocDialog();
 
         Button sprawdzBtn = (Button) findViewById(R.id.sprawdz);
-
+        sprawdzBtn.setEnabled(true);
         sprawdzBtn.setOnClickListener(view -> {
             dialog.show(getFragmentManager(), "Piopr");
             String wiadomosc;
+
             if(usersRG.getCheckedRadioButtonId()!=-1) {
                 RadioButton selected = (RadioButton) findViewById(usersRG.getCheckedRadioButtonId());
                 wiadomosc = selected.getText().toString();
@@ -230,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
             createdUser.mkdir();
             File defaultFolder = new File(createdUser, "default");
             defaultFolder.mkdir();
-            File eigenFolder = new File(createdUser, "eigen");
+            File eigenFolder = new File(createdUser, "visualizations");
             eigenFolder.mkdir();
             makeListOfUsers();
 

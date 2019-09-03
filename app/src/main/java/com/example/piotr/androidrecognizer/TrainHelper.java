@@ -26,6 +26,7 @@ import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.indexer.IntBufferIndexer;
+import org.bytedeco.javacpp.indexer.IntIndexer;
 import org.bytedeco.javacpp.indexer.IntRawIndexer;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.Mat;
@@ -34,6 +35,7 @@ import org.bytedeco.javacpp.opencv_core.Size;
 import org.bytedeco.javacpp.opencv_face;
 import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
 import org.bytedeco.javacpp.opencv_objdetect;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.Range;
 
 
@@ -61,6 +63,7 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
+import static org.bytedeco.javacpp.opencv_imgproc.threshold;
 
 /**
  * @author djalmaafilho
@@ -301,7 +304,15 @@ public class TrainHelper {
             counter++;
         }
 
-        IntRawIndexer idBuffer = labels.createIndexer();
+
+        //labels.create
+
+        //IntRawIndexer idBuffer = labels.createIndexer();
+        //IntBufferIndexer idBuffer = labels.createIndexer();
+        IntIndexer idBuffer = labels.createIndexer();
+
+
+        //labels.
 
 
 //        FaceRecognizer eigenfaces = createEigenFaceRecognizer();
@@ -330,6 +341,8 @@ public class TrainHelper {
 
 
         lbph.train(photos, labels);
+
+        Log.d("Piopr", "th: " + lbph.getThreshold());
         f = new File(photosFolder, LBPH_CLASSIFIER);
         f.createNewFile();
         lbph.save(f.getAbsolutePath());
@@ -425,15 +438,39 @@ public class TrainHelper {
         //Mat
 
         lbph.train(photos,labels);
+        lbph.train(photos,labels);
 
         MatVector histo = ((opencv_face.LBPHFaceRecognizer) lbph).getHistograms();
         Log.d("Piopr", "Histo rows: " + histo.get(0).rows());
         Log.d("Piopr", "Histo cols: " + histo.get(0).cols());
         Log.d("Piopr", "Histo total: " + histo.get(0).total());
         Log.d("Piopr", "Histo size: " + histo.size());
-        Mat output = histo.get(0);
+        Mat output = histo.get(10);
         normalize(output, output, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
-        imwrite(visPath+"/histo.jpg", histo.get(0).reshape(1,128));
+        imwrite(visPath+"/histo.jpg", output.reshape(1,128));
+        int radius = ((opencv_face.LBPHFaceRecognizer) lbph).getRadius();
+        int neighbours = ((opencv_face.LBPHFaceRecognizer) lbph).getNeighbors();
+        int gridX = ((opencv_face.LBPHFaceRecognizer) lbph).getGridX();
+        int gridY = ((opencv_face.LBPHFaceRecognizer) lbph).getGridY();
+        double th = lbph.getThreshold();
+        double th2 = th - 1.0d;
+        Log.d("Piopr", "th2: " + th2);
+        Log.d("Piopr", "th2: " + lbph.getThreshold());
+
+        
+
+
+
+        Mat lbpout = new Mat();
+
+        threshold(photos.get(10), lbpout, 128.797, 255, 0);
+        normalize(lbpout, lbpout, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
+        imwrite(visPath+"/lbpout.jpg", lbpout);
+
+
+
+        Log.d("Piopr", "radius: " + radius + ", neighbours: " + neighbours+
+                "\n gridX: "+ gridX + " gridY: " + gridY + " th: " + th);
     }
 
 
@@ -1095,7 +1132,9 @@ public class TrainHelper {
      * @return true: jeśli istnieje wiecej, niż jeden,  false: jeśli tylko jeden zestaw zdjęć
      *
      */
-    public static boolean checkCouplePersonsExists(IntRawIndexer idBuffer) {
+
+
+    public static boolean checkCouplePersonsExists(IntIndexer idBuffer) {
         int valueToCompare = idBuffer.get(0, 0);
         for (int i = 0; i < idBuffer.rows(); i++) {
             if (valueToCompare != idBuffer.get(i, 0))

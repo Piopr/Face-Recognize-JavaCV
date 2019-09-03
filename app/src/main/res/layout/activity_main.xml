@@ -16,6 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:clickable="false"
         android:text="Rozpoznaj twarz" />
 
     <ScrollView
@@ -67,6 +68,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
+        android:enabled="false"
         android:text="Sprawdz"
         android:visibility="visible" />
 
