@@ -17,14 +17,15 @@
         android:id="@+id/btTrain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start Train"
         android:layout_gravity="bottom|left"
-        />
+        android:enabled="false"
+        android:text="Start Train" />
     <Button
         android:id="@+id/btPrzygotuj"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Przygotuj"
+        android:enabled="false"
         android:layout_gravity="bottom|left"
         android:layout_marginBottom="50dp"
         />
@@ -33,6 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Przetworz"
+        android:enabled="false"
         android:layout_gravity="bottom|right"
         android:layout_marginBottom="50dp"
         />
@@ -42,6 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Ze zdjecia"
+        android:enabled="false"
         android:layout_gravity="bottom|right"
         android:layout_marginBottom="100dp"
         />
@@ -51,6 +54,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Srednia"
+        android:enabled="false"
         android:layout_gravity="bottom|right"
         android:layout_marginBottom="150dp"
         />
@@ -63,6 +67,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Take Photo"
+        android:enabled="false"
         android:layout_gravity="bottom|center_horizontal"/>
 
     <Button
@@ -70,6 +75,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Reset"
+        android:enabled="false"
         android:layout_gravity="bottom|right"/>
+
+    <ProgressBar
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:layout_gravity="center_vertical|center"/>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="✓"
+        android:textSize="30pt"
+        android:textColor="#00FF00"
+        android:layout_gravity="top|right"
+        android:visibility="invisible"/>
 
 </FrameLayout>

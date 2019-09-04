@@ -25,6 +25,8 @@ import java.util.List;
 import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.DoublePointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.indexer.IntBufferIndexer;
 import org.bytedeco.javacpp.indexer.IntIndexer;
 import org.bytedeco.javacpp.indexer.IntRawIndexer;
@@ -47,6 +49,7 @@ import static org.bytedeco.javacpp.opencv_core.NORM_MINMAX;
 import static org.bytedeco.javacpp.opencv_core.PCACompute;
 import static org.bytedeco.javacpp.opencv_core.PCACompute2;
 import static org.bytedeco.javacpp.opencv_core.add;
+import static org.bytedeco.javacpp.opencv_core.cvRound;
 import static org.bytedeco.javacpp.opencv_core.gemm;
 import static org.bytedeco.javacpp.opencv_core.noArray;
 import static org.bytedeco.javacpp.opencv_core.normalize;
@@ -108,6 +111,8 @@ public class TrainHelper {
     public static int CURRENT_IDUSER;
     public static String CURRENT_FOLDER;
     public static boolean FISHER_EXISTS;
+
+    public static boolean IS_TRAINED;
 
     /**
      * obsługa przycisku reset (usuniecie plikow z algorytmem rozpoznawania)
@@ -439,7 +444,7 @@ public class TrainHelper {
         //Mat
 
         lbph.train(photos,labels);
-        lbph.train(photos,labels);
+
 
         MatVector histo = ((opencv_face.LBPHFaceRecognizer) lbph).getHistograms();
         Log.d("Piopr", "Histo rows: " + histo.get(0).rows());
@@ -790,6 +795,7 @@ public class TrainHelper {
      */
     public static void takePhotoNew(Context context, int personId, int photoNumber, Mat rgbaMat, opencv_objdetect.CascadeClassifier faceDetector, String personDirName) throws Exception {
         //File folder = new File(context.getFilesDir(), TRAIN_FOLDER);
+
         File folder = new File("/mnt/sdcard/", TRAIN_FOLDER + "/" + personDirName);
         Log.d("Piopr", folder.toString());
         if (folder.exists() && !folder.isDirectory())
@@ -902,16 +908,21 @@ public class TrainHelper {
     }
 
 
-    public static Mat getPhotoToRecognize(Context context, String personDirName) {
+    public static void getPhotoToRecognize(Context context, String personDirName) throws Exception {
+
+        IS_TRAINED = false;
+
         Log.d("Piopr", "Funkcja getPhotoToRecognize");
         File currentFolder = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + personDirName + "/default");
         opencv_objdetect.CascadeClassifier faceDetector;
+        String[] usersNamesArray = TrainHelper.getUserNames();
+        Mat detectedFace = new Mat();
 
 
         if (!currentFolder.isDirectory() || !currentFolder.exists()) {
             Toast.makeText(context, "Folder default nie istnieje", Toast.LENGTH_SHORT).show();
             currentFolder.mkdir();
-            return null;
+            return;
         }
         File[] photosList = currentFolder.listFiles(new FilenameFilter() {
             @Override
@@ -921,41 +932,123 @@ public class TrainHelper {
         });
         if (photosList.length == 0 || photosList == null) {
             Toast.makeText(context, "Brak zdjęcia do rozpoznania", Toast.LENGTH_SHORT).show();
-            return null;
+            return;
         }
 
-        Mat photo = imread(photosList[0].getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
-        opencv_core.RectVector faces = new opencv_core.RectVector();
-
-        int height = photo.rows();
-        int width = photo.cols();
-        int maxFaceSize = height > width ? width : height;
-        int minFaceSize = maxFaceSize / 6;
+        //petla wykonuje sie do pierwszego wykrycia twarzy na którymkolwiek z wylistowanych zdjęć
+        loopBreaker:
+        for(int i =0; i<photosList.length; i++) {
 
 
-        faceDetector = loadClassifierCascade(context, R.raw.frontalface);
-        faceDetector.detectMultiScale(photo, faces, 1.25f, 3, 1,
-                new Size(minFaceSize, minFaceSize),
-                new Size(maxFaceSize, maxFaceSize));
+            Mat photo = imread(photosList[i].getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
+            opencv_core.RectVector faces = new opencv_core.RectVector();
 
-        if (faces.size() == 1) {
-            opencv_core.Rect face = faces.get(0);
-            photo = new Mat(photo, face);
-            resize(photo, photo, new Size(IMG_SIZE, IMG_SIZE));
-            imwrite(photosList[0].getAbsolutePath() + "1.jpg", photo);
+            int height = photo.rows();
+            int width = photo.cols();
+            int maxFaceSize = height > width ? width : height;
+            int minFaceSize = maxFaceSize / 6;
+            if (minFaceSize < 160) {
+                minFaceSize = 160;
+            }
+            if(height!=160) {
 
-        } else {
+                faceDetector = loadClassifierCascade(context, R.raw.frontalface);
+                faceDetector.detectMultiScale(photo, faces, 1.25f, 3, 1,
+                        new Size(minFaceSize, minFaceSize),
+                        new Size(maxFaceSize, maxFaceSize));
+
+
+                if (faces.size() == 1) {
+                    opencv_core.Rect face = faces.get(0);
+                    detectedFace = new Mat(photo, face);
+                    resize(detectedFace, detectedFace, new Size(IMG_SIZE, IMG_SIZE));
+                    imwrite(currentFolder+"/zzzdefault.jpg", detectedFace);
+                    break loopBreaker;
+                }
+            }
+        }
+        if(detectedFace.total()==0){
             Toast.makeText(context, "Nie wykryto twarzy na zdjęciu", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        if (!isTrained(context)) {
+        if (!isTrained(context) && detectedFace.total()!=0) {
             Toast.makeText(context, "Algorytm niewytrenowany", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        File trainfolder = new File("/mnt/sdcard/" + TRAIN_FOLDER);
+        File eigenFile = new File(trainfolder, EIGEN_FACES_CLASSIFIER);
+        File fisherFile = new File(trainfolder, FISHER_FACES_CLASSIFIER);
+        File lbphFile = new File(trainfolder, LBPH_CLASSIFIER);
+        String eigenText = "";
+        String fisherText= "";
+        String lbphText = "";
+        double accLvl = 4000.00D;
+
+
+        if(eigenFile.exists()) {
+            FaceRecognizer eigenFaces = opencv_face.EigenFaceRecognizer.create();
+            eigenFaces.read(eigenFile.getAbsolutePath());
+            IntPointer label = new IntPointer(1);
+            DoublePointer reliability = new DoublePointer(1);
+            eigenFaces.predict(detectedFace, label, reliability);
+            int prediction = label.get(0);
+            double acceptanceLevel = reliability.get(0);
+            if(prediction ==-1 || acceptanceLevel>=accLvl){
+                eigenText = "Nierozpoznano.\n";
+
+            } else {
+                eigenText = "Witaj "+usersNamesArray[prediction]+"! " +
+                        cvRound(acceptanceLevel) + "id: "+
+                        prediction+"\n";
+            }
         }
 
-        FaceRecognizer eigenfaces = opencv_face.EigenFaceRecognizer.create();
+
+        if(fisherFile.exists()){
+            FaceRecognizer fisherFaces = opencv_face.FisherFaceRecognizer.create();
+            fisherFaces.read(fisherFile.getAbsolutePath());
+
+            IntPointer label = new IntPointer(1);
+            DoublePointer reliability = new DoublePointer(1);
+            fisherFaces.predict(detectedFace, label, reliability);
+            int prediction = label.get(0);
+            double acceptanceLevel = reliability.get(0);
+            if(prediction ==-1 || acceptanceLevel>=accLvl){
+                fisherText = "Nierozpoznano.\n";
+
+            } else {
+                fisherText = "Witaj "+usersNamesArray[prediction]+"! " +
+                        cvRound(acceptanceLevel) + "id: "+
+                        prediction+"\n";
+            }
+        }
+
+        if(lbphFile.exists()){
+            FaceRecognizer lbph = opencv_face.LBPHFaceRecognizer.create();
+            lbph.read(lbphFile.getAbsolutePath());
+            IntPointer label = new IntPointer(1);
+            DoublePointer reliability = new DoublePointer(1);
+            lbph.predict(detectedFace, label, reliability);
+            int prediction = label.get(0);
+            double acceptanceLevel = reliability.get(0);
+            if(prediction ==-1 || acceptanceLevel>=accLvl){
+                lbphText = "Nierozpoznano.\n";
+
+            } else {
+                lbphText = "Witaj "+usersNamesArray[prediction]+"! " +
+                        cvRound(acceptanceLevel) + "id: "+
+                        prediction + "\n";
+            }
+        }
+
+        Toast.makeText(context, eigenText + fisherText + lbphText, Toast.LENGTH_SHORT).show();
+        Log.d("Piopr", eigenText + fisherText+lbphText);
+        if(isTrained(context)) {
+            IS_TRAINED = true;
+        }
 
 
-        return null;
     }
 
     /**
