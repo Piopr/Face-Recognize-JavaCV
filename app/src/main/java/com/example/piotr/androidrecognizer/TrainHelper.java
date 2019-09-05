@@ -7,6 +7,7 @@
 package com.example.piotr.androidrecognizer;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
@@ -106,11 +107,14 @@ public class TrainHelper {
      * poniżej 4000 - unknown
      */
     public static final double ACCEPT_LEVEL = 4000.0D;
+    public static final double ACCEPT_LEVEL_LBPH = 60.0D;
 
     public static String CURRENT_USER;
     public static int CURRENT_IDUSER;
     public static String CURRENT_FOLDER;
     public static boolean FISHER_EXISTS;
+    public static boolean VERIFIED = false;
+
 
     public static boolean IS_TRAINED;
 
@@ -356,7 +360,7 @@ public class TrainHelper {
         return true;
     }
 
-    public static void testMeanFaces(Context context) throws Exception {
+    public static void makeMeanFaces(Context context) throws Exception {
         File visPath = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + CURRENT_FOLDER + "/" + "visualizations/");
         if(!visPath.exists()){
             visPath.mkdir();
@@ -479,224 +483,6 @@ public class TrainHelper {
                 "\n gridX: "+ gridX + " gridY: " + gridY + " th: " + th);
     }
 
-
-    public static void makeMeanFaces(Context context) throws Exception {
-        File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
-        if (!photosFolder.exists()) return;
-
-        FilenameFilter imageFilter = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".jpg") || name.endsWith(".gif") || name.endsWith(".png");
-            }
-        };
-
-
-        File[] listOfUserFolders = photosFolder.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-
-                return file.isDirectory();
-            }
-        });
-
-
-        List<File> photosList = new ArrayList<File>();
-        for (File f : listOfUserFolders) {
-            List<File> tmpPhotosList = Arrays.asList(f.listFiles(imageFilter));
-            photosList.addAll(tmpPhotosList);
-        }
-
-        File[] files = new File[photosList.size()];
-        int counter = 0;
-        for (File f : photosList) {
-            files[counter] = f;
-            counter++;
-        }
-
-        for (File f : files) {
-            Log.d("Piopr", f.getAbsolutePath());
-        }
-
-
-
-        //File[] files = photosFolder.listFiles(imageFilter);
-        MatVector photos = new MatVector(files.length);
-        Mat labels = new Mat(files.length, 1, CV_32SC1);
-        IntBuffer rotulosBuffer = labels.createBuffer();
-        counter = 0;
-
-
-        for (File image : files) {
-            Mat photo = imread(image.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
-            int classe = Integer.parseInt(image.getName().split("\\.")[1]);
-            Log.d("Piopr", "Numer id: " + classe);
-
-            resize(photo, photo, new Size(IMG_SIZE, IMG_SIZE));
-            photos.put(counter, photo);
-
-            rotulosBuffer.put(counter, classe);
-            counter++;
-        }
-
-        File userphotosFolder = new File("/mnt/sdcard/"+TRAIN_FOLDER, CURRENT_FOLDER);
-        File[] userFiles = userphotosFolder.listFiles(imageFilter);
-        Mat data = new Mat();
-        for (File image : userFiles) {
-            Mat photo = imread(image.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
-            Mat tmp = photo.reshape(1, 1);
-            data.push_back(tmp);
-//            Log.d("Piopr", "Userfiles: " + image.getAbsolutePath());
-            counter++;
-        }
-
-
-        Log.d("Piopr", "Photos2 cols: " + data.cols());
-        Log.d("Piopr", "Photos2 rows: " + data.rows());
-
-
-        FaceRecognizer eigenfaces = opencv_face.EigenFaceRecognizer.create();
-        FaceRecognizer fisherfaces = opencv_face.FisherFaceRecognizer.create();
-        FaceRecognizer lbph = opencv_face.LBPHFaceRecognizer.create();
-
-
-        File f = new File(photosFolder, EIGEN_FACES_CLASSIFIER);
-        if (f.exists()) {
-            eigenfaces.read(f.getAbsolutePath());
-
-            File visPath = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + CURRENT_FOLDER + "/" + "visualizations/");
-            if(!visPath.exists()){
-                visPath.mkdir();
-            }
-
-            Mat eigenValues = ((opencv_face.EigenFaceRecognizer) eigenfaces).getEigenValues();
-            Mat eigenVectors = ((opencv_face.EigenFaceRecognizer) eigenfaces).getEigenVectors();
-            Mat mean = ((opencv_face.EigenFaceRecognizer) eigenfaces).getMean();
-            MatVector projections = ((opencv_face.EigenFaceRecognizer) eigenfaces).getProjections();
-            Log.d("Piopr", "EigenVectors kurwancka cols: " +eigenVectors.cols());
-
-//            for(int i = 0; i<files.length;i++){
-//                Mat wektorek = eigenVectors.col(i);
-//                transpose(wektorek, wektorek);
-//                Mat output= wektorek.reshape(1,160);
-//                normalize(output, output, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
-//                imwrite(visPath+"/wekt"+i+".jpg", output);
-//            }
-
-
-
-
-            int n = data.rows();
-            int d = data.cols();
-            int _numcomponents = userFiles.length;
-
-            opencv_core.PCA pca = new opencv_core.PCA(data, new Mat(), opencv_core.PCA.DATA_AS_ROW, _numcomponents);
-            Mat _mean = pca.mean();
-            Mat output = _mean.reshape(1,160);
-
-            imwrite(visPath+"/_mean3.jpg", output);
-            output.close();
-
-            _mean = _mean.reshape(1,1);
-
-            Mat _eigenvalues = pca.eigenvalues().clone();
-            Mat _eigenvectors = pca.eigenvectors();
-            transpose(_eigenvectors, _eigenvectors);
-
-            Mat X = new Mat();
-            Mat  Y = new Mat();
-            data.convertTo(X, _eigenvectors.type());
-
-
-
-            for(int i =0; i<_numcomponents; i++){
-                Mat ev = _eigenvectors.col(i).clone();
-                ev =  ev.reshape(1,160);
-                Mat ingray = new Mat();
-                normalize(ev, ingray, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
-                imwrite(visPath+"/matvec"+i+".jpg", ingray);
-            }
-
-            if(_eigenvectors.rows() != d) {
-                Log.d("Piopr", "Costam nietak");
-            }
-            if(!_mean.empty() && (mean.total() != d)) {
-                Log.d("Piopr", "Costam nietak2");
-            }
-
-            if(!_mean.empty()){
-                for(int i=0; i<n; i++){
-                    Mat r_i = X.row(i);
-                    subtract(r_i, _mean.reshape(1,1), r_i);
-                }
-            }
-            // finally calculate projection as Y = (X-mean)*W
-            gemm(X, _eigenvectors, 1.0, new Mat(), 0.0, Y);
-
-
-            imwrite(visPath+"/projection.jpg", Y);
-
-
-
-            int nn = Y.rows();
-            int dd = Y.cols();
-
-            if(_eigenvectors.cols() != dd) {
-                Log.d("Piopr", "Cos jest nietak1");
-            }
-
-            if(!_mean.empty() && (_mean.total() != _eigenvectors.rows())) {
-                Log.d("Piopr", "cos jest nietak2");
-            }
-
-            Mat XX = new Mat();
-            Mat YY = new Mat();
-            Y.convertTo(YY, _eigenvectors.type());
-            gemm(YY, _eigenvectors, 1.0, new Mat(), 0.0, XX, GEMM_2_T);
-
-            if(!_mean.empty()) {
-                for(int i=0; i<n; i++) {
-                    Mat r_i = X.row(i);
-                    add(r_i, _mean.reshape(1,1), r_i);
-                }
-            }
-            Mat output2 = XX.reshape(1,160);
-
-            imwrite(visPath+"/reconstr.jpg", output2);
-
-
-
-
-
-
-        }
-
-        //
-
-
-
-
-
-
-        f = new File(photosFolder, FISHER_FACES_CLASSIFIER);
-        if (f.exists()) {
-            fisherfaces.read(f.getAbsolutePath());
-
-            Mat mean2 = ((opencv_face.FisherFaceRecognizer) fisherfaces).getMean();
-            File tmpFile = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + CURRENT_FOLDER + "/" + "visualizations/" + "meanEigen.jpg");
-            imwrite(tmpFile.getAbsolutePath(), mean2.reshape(1, photos.get(0).rows()));
-
-            Mat fisherVectors = ((opencv_face.FisherFaceRecognizer) fisherfaces).getEigenVectors();
-            Log.d("Piopr", "Fisher rows"+fisherVectors.rows());
-            Log.d("Piopr", "Fisher cols"+fisherVectors.cols());
-
-            tmpFile = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + CURRENT_FOLDER + "/" + "visualizations/" + "meanEigen2.jpg");
-            imwrite(tmpFile.getAbsolutePath(), fisherVectors.reshape(1, 160));
-        }
-
-    }
-
-
     /**
      * zapis zdjęcia
      * <p>
@@ -726,74 +512,7 @@ public class TrainHelper {
      * @param rgbaMat      - oryginalny obrazek, przechwycony z cameraactivity
      * @param faceDetector - obiekt CascadeClassifier z pliku frontalface.xml
      */
-    public static void takePhoto(Context context, int personId, int photoNumber, Mat rgbaMat, opencv_objdetect.CascadeClassifier faceDetector) throws Exception {
-        //File folder = new File(context.getFilesDir(), TRAIN_FOLDER);
-        File folder = new File("/mnt/sdcard/", TRAIN_FOLDER);
-        Log.d("Piopr", folder.toString());
-        if (folder.exists() && !folder.isDirectory())
-            folder.delete();
-        if (!folder.exists())
-            folder.mkdirs();
-
-        int qtyPhotos = PHOTOS_TRAIN_QTY;
-        Mat greyMat = new Mat(rgbaMat.rows(), rgbaMat.cols());
-
-        cvtColor(rgbaMat, greyMat, CV_BGR2GRAY);
-        opencv_core.RectVector detectedFaces = new opencv_core.RectVector();
-        faceDetector.detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(160, 160), new Size(500, 500));
-        for (int i = 0; i < detectedFaces.size(); i++) {
-            Log.d("Piopr", "Wykonanie petli nr das das :  " + 1);
-            Log.d("Piopr", "detectedFaces :  " + detectedFaces.get(0));
-
-
-            opencv_core.Rect rectFace = detectedFaces.get(0);
-            Log.d("Piopr", "rectFace :  " + rectFace.get());
-            rectangle(rgbaMat, rectFace, new opencv_core.Scalar(0, 0, 255, 0));
-
-
-            Mat capturedFace = new Mat(greyMat, rectFace);
-            resize(capturedFace, capturedFace, new Size(IMG_SIZE, IMG_SIZE));
-
-            if (photoNumber <= qtyPhotos) {
-                File f = new File(folder, String.format(FILE_NAME_PATTERN, personId, photoNumber));
-                f.createNewFile();
-                imwrite(f.getAbsolutePath(), capturedFace);
-            }
-
-
-        }
-    }
-
-    /**
-     * zapis zdjęcia
-     * <p>
-     * Na początku kontrola, czy istnieje folder. Jeśli nie - tworzy go
-     * Stworzenie kopii zdjęcia w zmiennej greyMat klasy Mat. Przekształcenie na greyscale
-     * Stworzenie wektora o 4 współrzędnych (współrzędne tworzonego kwadratu podczas detekcji twarzy), zmienna detectedFaces.
-     * <p>
-     * zdjęcie zapisuje się w formacie: person.personId.photonumber.jpg
-     * <p>
-     * użycie metody detectMultiScale() na obiekcie faceDetector:
-     * detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
-     * greyMat - zdjęcie z którygo chcemy wykryć twarz
-     * detectedFaces - obiekt, do którego zapisujemy współrzędne, w których została wykryta twarz na zdjęciu
-     * 1.1 - współczynnik, który określa o ile wielkośc obrazu zostanie zmniejszona
-     * 1 - Parametr określający, ilu sąsiadów każdy kandydujący prostokąt powinien zachować.
-     * 0 - używane w starszych wersjach cascadeClassifier
-     * 150, 150 - minimalny rozmiar w pikselach fragmentu zdjęcia, na którym znajduje się twarz
-     * 500, 500 - maksymalny rozmiar na zdjęciu, na którym może znaleźć się twarz
-     * <p>
-     * wykonuje się pętla przechodząca po wszystkich wykrytych tawrzach (zwykle, i poprawnie po jednej),
-     * w tej pętli wszystkie wykryte twarze nadpisywane są do wcześniej stworzonego pliku .jpg w skali szarości i rozmiarze określonym
-     * w zmiennej IMG_SIZE
-     *
-     * @param context      - aktualny widok
-     * @param personId     - id osoby - dodawane do nazwy pliku
-     * @param photoNumber  - numer zrobionego zdjęcia, dodawane do nazwy pliku
-     * @param rgbaMat      - oryginalny obrazek, przechwycony z cameraactivity
-     * @param faceDetector - obiekt CascadeClassifier z pliku frontalface.xml
-     */
-    public static void takePhotoNew(Context context, int personId, int photoNumber, Mat rgbaMat, opencv_objdetect.CascadeClassifier faceDetector, String personDirName) throws Exception {
+    public static void takePhoto(Context context, int personId, int photoNumber, Mat rgbaMat, opencv_objdetect.CascadeClassifier faceDetector, String personDirName) throws Exception {
         //File folder = new File(context.getFilesDir(), TRAIN_FOLDER);
 
         File folder = new File("/mnt/sdcard/", TRAIN_FOLDER + "/" + personDirName);
@@ -908,11 +627,12 @@ public class TrainHelper {
     }
 
 
-    public static void getPhotoToRecognize(Context context, String personDirName) throws Exception {
+    public static void recognizeFromPhoto(Context context, String personDirName) throws Exception {
+        Toast.makeText(context, "Sprawdzanie...", Toast.LENGTH_SHORT).show();
 
         IS_TRAINED = false;
 
-        Log.d("Piopr", "Funkcja getPhotoToRecognize");
+        Log.d("Piopr", "Funkcja recognizeFromPhoto");
         File currentFolder = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + personDirName + "/default");
         opencv_objdetect.CascadeClassifier faceDetector;
         String[] usersNamesArray = TrainHelper.getUserNames();
@@ -922,6 +642,9 @@ public class TrainHelper {
         if (!currentFolder.isDirectory() || !currentFolder.exists()) {
             Toast.makeText(context, "Folder default nie istnieje", Toast.LENGTH_SHORT).show();
             currentFolder.mkdir();
+            if (isTrained(context)) {
+                IS_TRAINED = true;
+            }
             return;
         }
         File[] photosList = currentFolder.listFiles(new FilenameFilter() {
@@ -932,12 +655,15 @@ public class TrainHelper {
         });
         if (photosList.length == 0 || photosList == null) {
             Toast.makeText(context, "Brak zdjęcia do rozpoznania", Toast.LENGTH_SHORT).show();
+            if (isTrained(context)) {
+                IS_TRAINED = true;
+            }
             return;
         }
 
         //petla wykonuje sie do pierwszego wykrycia twarzy na którymkolwiek z wylistowanych zdjęć
         loopBreaker:
-        for(int i =0; i<photosList.length; i++) {
+        for (int i = 0; i < photosList.length; i++) {
 
 
             Mat photo = imread(photosList[i].getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
@@ -950,7 +676,10 @@ public class TrainHelper {
             if (minFaceSize < 160) {
                 minFaceSize = 160;
             }
-            if(height!=160) {
+            if (height == 160) {
+                detectedFace = photo;
+                break loopBreaker;
+            } else {
 
                 faceDetector = loadClassifierCascade(context, R.raw.frontalface);
                 faceDetector.detectMultiScale(photo, faces, 1.25f, 3, 1,
@@ -962,17 +691,20 @@ public class TrainHelper {
                     opencv_core.Rect face = faces.get(0);
                     detectedFace = new Mat(photo, face);
                     resize(detectedFace, detectedFace, new Size(IMG_SIZE, IMG_SIZE));
-                    imwrite(currentFolder+"/zzzdefault.jpg", detectedFace);
+                    imwrite(currentFolder + "/zzzdefault.jpg", detectedFace);
+                    if (detectedFace.total() == 0) {
+                        Toast.makeText(context, "Nie wykryto twarzy na zdjęciu", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     break loopBreaker;
                 }
             }
-        }
-        if(detectedFace.total()==0){
-            Toast.makeText(context, "Nie wykryto twarzy na zdjęciu", Toast.LENGTH_SHORT).show();
-            return;
+
         }
 
-        if (!isTrained(context) && detectedFace.total()!=0) {
+
+        if (!isTrained(context) && detectedFace.total() != 0) {
             Toast.makeText(context, "Algorytm niewytrenowany", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -981,12 +713,12 @@ public class TrainHelper {
         File fisherFile = new File(trainfolder, FISHER_FACES_CLASSIFIER);
         File lbphFile = new File(trainfolder, LBPH_CLASSIFIER);
         String eigenText = "";
-        String fisherText= "";
+        String fisherText = "";
         String lbphText = "";
         double accLvl = 4000.00D;
 
 
-        if(eigenFile.exists()) {
+        if (eigenFile.exists()) {
             FaceRecognizer eigenFaces = opencv_face.EigenFaceRecognizer.create();
             eigenFaces.read(eigenFile.getAbsolutePath());
             IntPointer label = new IntPointer(1);
@@ -994,18 +726,18 @@ public class TrainHelper {
             eigenFaces.predict(detectedFace, label, reliability);
             int prediction = label.get(0);
             double acceptanceLevel = reliability.get(0);
-            if(prediction ==-1 || acceptanceLevel>=accLvl){
+            if (prediction == -1 || acceptanceLevel >= accLvl) {
                 eigenText = "Nierozpoznano.\n";
 
             } else {
-                eigenText = "Witaj "+usersNamesArray[prediction]+"! " +
-                        cvRound(acceptanceLevel) + "id: "+
-                        prediction+"\n";
+                eigenText = "Witaj " + usersNamesArray[prediction] + "! " +
+                        cvRound(acceptanceLevel) + "id: " +
+                        prediction + "\n";
             }
         }
 
 
-        if(fisherFile.exists()){
+        if (fisherFile.exists()) {
             FaceRecognizer fisherFaces = opencv_face.FisherFaceRecognizer.create();
             fisherFaces.read(fisherFile.getAbsolutePath());
 
@@ -1014,17 +746,17 @@ public class TrainHelper {
             fisherFaces.predict(detectedFace, label, reliability);
             int prediction = label.get(0);
             double acceptanceLevel = reliability.get(0);
-            if(prediction ==-1 || acceptanceLevel>=accLvl){
+            if (prediction == -1 || acceptanceLevel >= accLvl) {
                 fisherText = "Nierozpoznano.\n";
 
             } else {
-                fisherText = "Witaj "+usersNamesArray[prediction]+"! " +
-                        cvRound(acceptanceLevel) + "id: "+
-                        prediction+"\n";
+                fisherText = "Witaj " + usersNamesArray[prediction] + "! " +
+                        cvRound(acceptanceLevel) + "id: " +
+                        prediction + "\n";
             }
         }
 
-        if(lbphFile.exists()){
+        if (lbphFile.exists()) {
             FaceRecognizer lbph = opencv_face.LBPHFaceRecognizer.create();
             lbph.read(lbphFile.getAbsolutePath());
             IntPointer label = new IntPointer(1);
@@ -1032,24 +764,85 @@ public class TrainHelper {
             lbph.predict(detectedFace, label, reliability);
             int prediction = label.get(0);
             double acceptanceLevel = reliability.get(0);
-            if(prediction ==-1 || acceptanceLevel>=accLvl){
+            if (prediction == -1 || acceptanceLevel >= accLvl) {
                 lbphText = "Nierozpoznano.\n";
 
             } else {
-                lbphText = "Witaj "+usersNamesArray[prediction]+"! " +
-                        cvRound(acceptanceLevel) + "id: "+
+                lbphText = "Witaj " + usersNamesArray[prediction] + "! " +
+                        cvRound(acceptanceLevel) + "id: " +
                         prediction + "\n";
+                if (CURRENT_IDUSER == prediction) {
+                    VERIFIED = true;
+                } else {
+                    VERIFIED = false;
+                }
             }
         }
 
+
         Toast.makeText(context, eigenText + fisherText + lbphText, Toast.LENGTH_SHORT).show();
-        Log.d("Piopr", eigenText + fisherText+lbphText);
-        if(isTrained(context)) {
+        Log.d("Piopr", eigenText + fisherText + lbphText);
+        if (isTrained(context)) {
             IS_TRAINED = true;
         }
 
 
     }
+
+    public static void predictTest(Context context){
+        String outputText ="";
+        File mainFolder = new File("/mnt/sdcard/"+TRAIN_FOLDER);
+        FilenameFilter directoryFilter = new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                return file.isDirectory();
+            }
+        };
+        FilenameFilter photosFilter = new FilenameFilter() {
+            @Override
+            public boolean accept(File file, String s) {
+                return s.endsWith(".jpg") || s.endsWith(".gif") || s.endsWith(".png");
+            }
+        };
+        File[] folderList = mainFolder.listFiles(directoryFilter);
+        if(folderList.length==0) {
+            Toast.makeText(context, "Brak stworzonych uzytkownikow.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        File eigenFile = new File(mainFolder, EIGEN_FACES_CLASSIFIER);
+        File fisherFile = new File(mainFolder, FISHER_FACES_CLASSIFIER);
+        File lbphFile = new File(mainFolder, LBPH_CLASSIFIER);
+        if(eigenFile.exists()){
+            FaceRecognizer eigen = opencv_face.EigenFaceRecognizer.create();
+            eigen.read(eigenFile.getAbsolutePath());
+        }
+        if(fisherFile.exists()){
+            FaceRecognizer fisher = opencv_face.FisherFaceRecognizer.create();
+            fisher.read(fisherFile.getAbsolutePath());
+        }
+        if(lbphFile.exists()){
+            FaceRecognizer lbph = opencv_face.LBPHFaceRecognizer.create();
+            lbph.read(lbphFile.getAbsolutePath());
+        }
+
+
+        for(File currentFolder : folderList){
+            File defaultFolder = new File(currentFolder, "default");
+            if(!defaultFolder.exists()){
+                Toast.makeText(context, "Folder default nie istnieje", Toast.LENGTH_SHORT).show();
+            } else {
+                File[] photosList = defaultFolder.listFiles(photosFilter);
+                if(photosList.length!=0){
+                    //TODO: dokonczyc wykrywania i predykcje
+                }
+
+            }
+        }
+
+    }
+
+
+
 
     /**
      * załadowanie kaskady do detekcji twarzy
