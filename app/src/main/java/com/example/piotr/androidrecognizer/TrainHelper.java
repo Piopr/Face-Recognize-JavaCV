@@ -602,6 +602,9 @@ public class TrainHelper {
                 //faceDetector.detectMultiScale(photoMat, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
                 faceDetector.detectMultiScale(photoMat, detectedFaces, 1.1, 1, 0, new Size(minFaceSize, minFaceSize), new Size(maxFaceSize, maxFaceSize));
                 Log.d("Piopr", "wykrywanie twarzy na zdjeciu");
+                if(detectedFaces.size()<0){
+                    f.delete();
+                }
                 for (int i = 0; i < detectedFaces.size(); i++) {
                     opencv_core.Rect rectFace = detectedFaces.get(0);
 
@@ -833,7 +836,7 @@ public class TrainHelper {
             } else {
                 File[] photosList = defaultFolder.listFiles(photosFilter);
                 if(photosList.length!=0){
-                    //TODO: dokonczyc wykrywania i predykcje
+                    //TODO: dokonczyc wykrywania i predykcje oraz odpowiedni id usera;
                 }
 
             }
