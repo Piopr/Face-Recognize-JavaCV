@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
 
         for(String t :users){
             RadioButton userRB = new RadioButton(this);
-            userRB.setText(t.substring(1));
+            userRB.setText(t.replaceAll("[0-9]",""));
             usersRG.addView(userRB);
             Log.d("Piopr", t);
         }
@@ -279,14 +279,14 @@ public class MainActivity extends AppCompatActivity {
     Integer[] getUserIds(String[] users){
         Integer[] usersIds = new Integer[users.length];
         for(int i = 0; i<users.length; i++){
-            usersIds[i]=Integer.parseInt(users[i].substring(0,1));
+            usersIds[i]=Integer.parseInt(users[i].replaceAll("[^0-9]", ""));
         }
         return usersIds;
     }
 
     String[] getUserNames(String[] users){
         for(int i =0; i<users.length; i++){
-            users[i] = users[i].substring(1, users[i].length());
+            users[i] = users[i].replaceAll("[0-9]","");
         }
         return users;
     }

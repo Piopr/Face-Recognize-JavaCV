@@ -611,8 +611,15 @@ public class TrainHelper {
                         Log.d("Piopr", "Nie usunieto");
                     }
                 }
+                int maxRect = 0;
                 for (int i = 0; i < detectedFaces.size(); i++) {
-                    opencv_core.Rect rectFace = detectedFaces.get(0);
+                    opencv_core.Rect rectFace = detectedFaces.get(i);
+                    if(rectFace.size().area()>detectedFaces.get(maxRect).size().area()){
+                        maxRect = i;
+                    }
+                }
+                if(detectedFaces.size()>0){
+                    opencv_core.Rect rectFace = detectedFaces.get(maxRect);
 
                     //czy zamiast photoMat oryginalny w kolorze?
                     rectangle(photoMat, rectFace, new opencv_core.Scalar(0, 0, 255, 0));
@@ -624,6 +631,7 @@ public class TrainHelper {
 
                     imwrite(f.getAbsolutePath(), capturedFace);
                     //imwrite(f.getAbsolutePath(), photoMat);
+
                 }
 
             }
@@ -642,7 +650,7 @@ public class TrainHelper {
         IS_TRAINED = false;
 
         Log.d("Piopr", "Funkcja recognizeFromPhoto");
-        File currentFolder = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + personDirName + "/default");
+        File currentFolder = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + TrainHelper.CURRENT_FOLDER + "/default");
         opencv_objdetect.CascadeClassifier faceDetector;
         String[] usersNamesArray = TrainHelper.getUserNames();
         Mat detectedFace = new Mat();
@@ -687,6 +695,7 @@ public class TrainHelper {
             }
             if (height == 160) {
                 detectedFace = photo;
+                Log.d("Piopr", "zdjecie juz gotowe");
                 break loopBreaker;
             } else {
 
@@ -711,6 +720,7 @@ public class TrainHelper {
             }
 
         }
+        imwrite(currentFolder + "/zzzdefault.jpg", detectedFace);
 
 
         if (!isTrained(context) && detectedFace.total() != 0) {
@@ -740,7 +750,7 @@ public class TrainHelper {
 
             } else {
                 eigenText = "Witaj " + usersNamesArray[prediction] + "! " +
-                        cvRound(acceptanceLevel) + "id: " +
+                        acceptanceLevel + "id: " +
                         prediction + "\n";
             }
         }
@@ -844,7 +854,7 @@ public class TrainHelper {
         List<String> lbphOutput = new ArrayList<>();
         for(File currentFolder : folderList){
             Log.d("Piopr", "Wykonanie dla: " + currentFolder.getName());
-            int currentId =  Integer.parseInt(currentFolder.getName().substring(0,1));
+            int currentId =  Integer.parseInt(currentFolder.getName().replaceAll("[^0-9]", ""));
             File defaultFolder = new File(currentFolder, "default");
             if(!defaultFolder.exists()){
                 Toast.makeText(context, "Folder default nie istnieje", Toast.LENGTH_SHORT).show();
@@ -1046,7 +1056,7 @@ public class TrainHelper {
         });
         Integer[] usersIds = new Integer[users.length];
         for (int i = 0; i < users.length; i++) {
-            usersIds[i] = Integer.parseInt(users[i].substring(0, 1));
+            usersIds[i] = Integer.parseInt(users[i].replaceAll("[^0-9]", ""));
         }
         return usersIds;
     }
@@ -1064,7 +1074,7 @@ public class TrainHelper {
             }
         });
         for (int i = 0; i < users.length; i++) {
-            users[i] = users[i].substring(1);
+            users[i] = users[i].replaceAll("[0-9]","");
         }
         Log.d("Piopr", "Dlogosc users: " + users.length);
         String[] usersList = new String[users.length + 1];
