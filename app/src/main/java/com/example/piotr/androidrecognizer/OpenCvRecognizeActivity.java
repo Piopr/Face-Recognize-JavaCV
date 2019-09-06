@@ -141,7 +141,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
     @SuppressLint("StaticFieldLeak")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(null);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_opencv);
         /*
         Sprawdzanie uprawnien czytania i pisania
@@ -323,6 +323,15 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                     }
                 });
                 findViewById(R.id.btPrzygotuj).setEnabled(true);
+
+                findViewById(R.id.btTesting).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        TrainHelper.predictTest(getBaseContext());
+                        //TrainHelper.listPhotos();
+                    }
+                });
+                findViewById(R.id.btTesting).setEnabled(true);
 
 
                 findViewById(R.id.loading).setVisibility(View.GONE);
@@ -548,6 +557,10 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         }
         return rgbaMat;
     }
+
+
+
+
 
     void alertRemainingPhotos() {
         runOnUiThread(new Runnable() {
