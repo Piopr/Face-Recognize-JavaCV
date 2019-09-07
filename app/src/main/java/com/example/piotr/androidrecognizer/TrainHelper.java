@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
@@ -1073,19 +1074,57 @@ public class TrainHelper {
                 return new File(current, name).isDirectory();
             }
         });
+
+        String[] copyOfUsers = users.clone();
+        int[] cou2 = new int[copyOfUsers.length];
+        for(int i=0; i<copyOfUsers.length; i++){
+            copyOfUsers[i] = copyOfUsers[i].replaceAll("[^0-9]", "");
+            cou2[i] = Integer.parseInt(copyOfUsers[i]);
+
+            Log.d("Piopr", "cou: " + copyOfUsers[i]);
+        }
+
+        //String[] tmp = copyOfUsers;
+        //int arraySize = Integer.parseInt(Collections.max(Arrays.asList(tmp)));
+        int arraySize = 0;
+        for(int i=0; i<cou2.length; i++){
+            if(cou2[i]>arraySize){
+                arraySize = cou2[i];
+            }
+        }
+
+        Log.d("Piopr", "array size: " + arraySize);
         for (int i = 0; i < users.length; i++) {
             users[i] = users[i].replaceAll("[0-9]","");
         }
-        Log.d("Piopr", "Dlogosc users: " + users.length);
+
         String[] usersList = new String[users.length + 1];
-        Log.d("Piopr", "Dlogosc usersList: " + usersList.length);
-        usersList[0] = "";
+        String[] usersList2 = new String[arraySize+ 1];
+
+
+
+        //usersList[0] = "";
+        for(int i =0; i<usersList2.length; i++){
+            usersList2[i] = "";
+        }
+
+
         for (int i = 0; i < users.length; i++) {
             usersList[i + 1] = users[i];
         }
-        Log.d("Piopr", "Dlogosc usersList2: " + usersList.length);
 
-        return usersList;
+        Log.d("Piopr", "Dlogosc usersList2: " + usersList.length);
+        for (int i = 0; i < copyOfUsers.length; i++) {
+            //Log.d("Piopr", "ktotam: " + copyOfUsers[i]);
+            usersList2[Integer.parseInt(copyOfUsers[i])] = users[i];
+        }
+
+        for(String s : usersList2){
+            Log.d("Piopr", "ul2: " + s);
+        }
+        Log.d("Piopr", "Userlist length: " + usersList2.length );
+
+        return usersList2;
     }
 
     /**

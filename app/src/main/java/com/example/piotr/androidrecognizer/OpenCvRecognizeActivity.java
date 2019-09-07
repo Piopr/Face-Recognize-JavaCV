@@ -197,6 +197,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                         File folder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
                         File f = new File(folder, TrainHelper.EIGEN_FACES_CLASSIFIER);
                         faceRecognizer.read(f.getAbsolutePath());
+
                         TrainHelper.FISHER_EXISTS = TrainHelper.checkFisherExists();
                         if (FISHER_EXISTS) {
 
@@ -207,8 +208,8 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
 
                         f = new File(folder, TrainHelper.LBPH_CLASSIFIER);
                         faceLBPH.read(f.getAbsolutePath());
-                        trained = true;
-                        IS_TRAINED = true;
+
+
                     }
                 } catch (Exception e) {
                     Log.d(TAG, e.getLocalizedMessage(), e);
@@ -225,6 +226,12 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
+
+                if(isTrained(getBaseContext())){
+                    trained = true;
+                    IS_TRAINED = true;
+                    Log.d("Piopr", "Is Trained");
+                }
 
                 findViewById(R.id.btPhoto).setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -422,6 +429,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
      * @param rgbaMat - przechwycone zdjęcie w kolorze + kanał alfa
      */
     private void recognize(opencv_core.Rect dadosFace, Mat grayMat, Mat rgbaMat) {
+
         Mat detectedFace = new Mat(grayMat, dadosFace);
         resize(detectedFace, detectedFace, new Size(TrainHelper.IMG_SIZE, TrainHelper.IMG_SIZE));
 
@@ -535,7 +543,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                     alertRemainingPhotos();
                 }
                 showDetectedFace(faces, rgbaMat);
-                if (IS_TRAINED) {
+                if (IS_TRAINED && trained) {
                     recognize(faces.get(0), greyMat, rgbaMat);
                 } else {
                     noTrainedLabel(faces.get(0), rgbaMat);
