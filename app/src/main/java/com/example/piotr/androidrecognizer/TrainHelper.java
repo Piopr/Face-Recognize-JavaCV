@@ -123,7 +123,7 @@ public class TrainHelper {
     /**
      * obsługa przycisku reset (usuniecie plikow z algorytmem rozpoznawania)
      *
-     * @param context
+     * @param context - aktualne activity
      */
     public static void reset(Context context) throws Exception {
         //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
@@ -195,29 +195,13 @@ public class TrainHelper {
         return false;
     }
 
+
+
+
     /**
      * Służy oliczenie ilość plików zdjęciowych znajdujących się w folderrze treningu
-     *
-     * @param context - aktualny widok
      * @return - ilosc zdjęć
      */
-    public static int qtdPhotos(Context context) {
-        //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
-        File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
-        if (photosFolder.exists()) {
-            FilenameFilter imageFilter = new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    return name.endsWith(".jpg") || name.endsWith(".gif") || name.endsWith(".png");
-                }
-            };
-
-            File[] files = photosFolder.listFiles(imageFilter);
-            return files != null ? files.length : 0;
-        }
-        return 0;
-    }
-
     public static int qtdPhotosNew() {
         //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
         File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER + "/" + TrainHelper.CURRENT_FOLDER);
