@@ -332,7 +332,11 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                 findViewById(R.id.btTesting).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        TrainHelper.predictTest(getBaseContext());
+                        try {
+                            TrainHelper.predictTest(getBaseContext());
+                        } catch (Exception e) {
+                            Log.d("Piopr", e.getLocalizedMessage(), e);
+                        }
                         //TrainHelper.listPhotos();
                     }
                 });

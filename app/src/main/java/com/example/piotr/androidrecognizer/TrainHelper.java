@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +41,7 @@ import org.bytedeco.javacpp.opencv_face;
 import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
 import org.bytedeco.javacpp.opencv_objdetect;
 import org.bytedeco.javacpp.opencv_tracking;
+import org.bytedeco.javacv.FrameFilter;
 import org.opencv.core.MatOfInt;
 import org.opencv.core.Range;
 
@@ -466,29 +468,29 @@ public class TrainHelper {
 
 
     /**
-     * zapis zdjęcia
-     * <p>
-     * Na początku kontrola, czy istnieje folder. Jeśli nie - tworzy go
-     * Stworzenie kopii zdjęcia w zmiennej greyMat klasy Mat. Przekształcenie na greyscale
-     * Stworzenie wektora o 4 współrzędnych (współrzędne tworzonego kwadratu podczas detekcji twarzy), zmienna detectedFaces.
-     * <p>
-     * zdjęcie zapisuje się w formacie: person.personId.photonumber.jpg
-     * <p>
+     * Wykrywanie twarzy na zdjęciach znajdujących sie w folderze uzytkownika<br>
+     * Na początku kontrola, czy istnieje folder. Jeśli nie - tworzy go<br>
+     * Zapisanie do listy wszystkich zdjęć i zapisanie ich w grayscale
+     * Stworzenie wektora o 4 współrzędnych (współrzędne tworzonego kwadratu podczas detekcji twarzy), zmienna detectedFaces<br>
+     * zdjęcie zapisuje się w formacie: person.personId.photonumber.jpg <br>
      * użycie metody detectMultiScale() na obiekcie faceDetector:
      * detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
      * greyMat - zdjęcie z którygo chcemy wykryć twarz
-     * detectedFaces - obiekt, do którego zapisujemy współrzędne, w których została wykryta twarz na zdjęciu
-     * 1.1 - współczynnik, który określa o ile wielkośc obrazu zostanie zmniejszona
-     * 1 - Parametr określający, ilu sąsiadów każdy kandydujący prostokąt powinien zachować.
-     * 0 - używane w starszych wersjach cascadeClassifier
-     * 150, 150 - minimalny rozmiar w pikselach fragmentu zdjęcia, na którym znajduje się twarz
-     * 500, 500 - maksymalny rozmiar na zdjęciu, na którym może znaleźć się twarz
-     * <p>
+     * detectedFaces - obiekt, do którego zapisujemy współrzędne, w których została wykryta twarz na zdjęciu<br>
+     * 1.1 - współczynnik, który określa o ile wielkośc obrazu zostanie zmniejszona<br>
+     * 1 - Parametr określający, ilu sąsiadów każdy kandydujący prostokąt powinien zachować.<br>
+     * 0 - używane w starszych wersjach cascadeClassifier<br>
+     * 150, 150 - minimalny rozmiar w pikselach fragmentu zdjęcia, na którym znajduje się twarz<br>
+     * 500, 500 - maksymalny rozmiar na zdjęciu, na którym może znaleźć się twarz<br>
+     *
      * wykonuje się pętla przechodząca po wszystkich wykrytych tawrzach (zwykle, i poprawnie po jednej),
+     * Jesli nie wykryto twarzy na zdjeciu usuwa je
      * w tej pętli wszystkie wykryte twarze nadpisywane są do wcześniej stworzonego pliku .jpg w skali szarości i rozmiarze określonym
      * w zmiennej IMG_SIZE
      *
      * @param faceDetector - obiekt CascadeClassifier z pliku frontalface.xml
+     * @param context - aktualne acitvity
+     * @param personDirName - aktualny folder uzytkownika (jego nazwa)
      */
     public static void detectFaceFromPhotos(Context context, opencv_objdetect.CascadeClassifier faceDetector, String personDirName) throws Exception {
         //File folder = new File(context.getFilesDir(), TRAIN_FOLDER);
@@ -516,14 +518,11 @@ public class TrainHelper {
             int newHeight = (int) (640 * (4.0f / 3.0f));
 
             if (width != 160) {
-                //resize(photoMat, photoMat, new Size(newWidth, newHeight));
                 opencv_core.RectVector detectedFaces = new opencv_core.RectVector();
-                //faceDetector.detectMultiScale(photoMat, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
                 faceDetector.detectMultiScale(photoMat, detectedFaces, 1.1, 1, 0, new Size(minFaceSize, minFaceSize), new Size(maxFaceSize, maxFaceSize));
-                Log.d("Piopr", "wykrywanie twarzy na zdjeciu");
                 Log.d("Piopr", "detectet size: " + detectedFaces.size());
-                if(detectedFaces.size()==0){
-                    if(f.delete()){
+                if (detectedFaces.size() == 0) {
+                    if (f.delete()) {
                         Log.d("Piopr", "Usunieto");
                     } else {
                         Log.d("Piopr", "Nie usunieto");
@@ -532,36 +531,30 @@ public class TrainHelper {
                 int maxRect = 0;
                 for (int i = 0; i < detectedFaces.size(); i++) {
                     opencv_core.Rect rectFace = detectedFaces.get(i);
-                    if(rectFace.size().area()>detectedFaces.get(maxRect).size().area()){
+                    if (rectFace.size().area() > detectedFaces.get(maxRect).size().area()) {
                         maxRect = i;
                     }
                 }
-                if(detectedFaces.size()>0){
+                if (detectedFaces.size() > 0) {
                     opencv_core.Rect rectFace = detectedFaces.get(maxRect);
-
-                    //czy zamiast photoMat oryginalny w kolorze?
                     rectangle(photoMat, rectFace, new opencv_core.Scalar(0, 0, 255, 0));
-
-
                     Mat capturedFace = new Mat(photoMat, rectFace);
-
                     resize(capturedFace, capturedFace, new Size(IMG_SIZE, IMG_SIZE));
-
                     imwrite(f.getAbsolutePath(), capturedFace);
-                    //imwrite(f.getAbsolutePath(), photoMat);
-
                 }
-
             }
-
-
         }
         Toast.makeText(context, "Wykryto twarze na zdjeciach.", Toast.LENGTH_SHORT).show();
-
-
     }
 
-
+    /***
+     * Rozpoznawanie twarzy aktualnego uzytkownika ze zdjecia znajdujacego sie w folderze "default" aktualnego uzytkownika.<br>
+     *     W przypadku kilku zdjec w folderze szuka na zdjeciach do momentu, az wykryje twarz.<br>
+     *     Gdy poprawnie rozpozna twarz z aktualnym uzytkownikiem, pojawia się zielony znak na activity informujacy o tym.
+     *     Pod tagiem loguje także informacje o przebiegu rozpoznania.
+     * @param context - aktualne activity
+     * @param personDirName - aktualny folder uzytkownika
+     */
     public static void recognizeFromPhoto(Context context, String personDirName) throws Exception {
         Toast.makeText(context, "Sprawdzanie...", Toast.LENGTH_SHORT).show();
 
@@ -726,16 +719,28 @@ public class TrainHelper {
 
     }
 
-    public static void predictTest(Context context){
-        String outputText ="";
-        File mainFolder = new File("/mnt/sdcard/"+TRAIN_FOLDER);
+
+    /***
+     * Test rozpoznawania twarzy.<br>
+     * wykrywa twarze we wszystkich folderach uzytkownikow, w folderze default i porównuje je z wytrenowanymi algorytmami.<br>
+     * czyli np. /user1/default/...<br>
+     * Wyswietla komunikaty odnosnie rozpoznania dla kazdego z algorytmow w formacie:<br>
+     *     <b>nazwa_uzytkownika, czy_rozpoznano, poziom_rozpoznania</b> np.:<br>
+     *      <b>1user, true, 3231.123</b>
+     *
+     *   <br>
+     *       Wynik zapisywany jest do plików .cvs w folderze głównym.
+     * @param context
+     */
+    public static void predictTest(Context context) throws Exception {
+        String outputText = "";
+        File mainFolder = new File("/mnt/sdcard/" + TRAIN_FOLDER);
         FileFilter directoryFilter = new FileFilter() {
             @Override
             public boolean accept(File file) {
                 return file.isDirectory();
             }
         };
-
 
 
         FilenameFilter photosFilter = new FilenameFilter() {
@@ -745,7 +750,7 @@ public class TrainHelper {
             }
         };
         File[] folderList = mainFolder.listFiles(directoryFilter);
-        if(folderList.length==0) {
+        if (folderList.length == 0) {
             Toast.makeText(context, "Brak stworzonych uzytkownikow.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -753,15 +758,15 @@ public class TrainHelper {
         File fisherFile = new File(mainFolder, FISHER_FACES_CLASSIFIER);
         File lbphFile = new File(mainFolder, LBPH_CLASSIFIER);
         FaceRecognizer eigenFaces = opencv_face.EigenFaceRecognizer.create();
-        if(eigenFile.exists()){
+        if (eigenFile.exists()) {
             eigenFaces.read(eigenFile.getAbsolutePath());
         }
         FaceRecognizer fisherFaces = opencv_face.FisherFaceRecognizer.create();
-        if(fisherFile.exists()){
+        if (fisherFile.exists()) {
             fisherFaces.read(fisherFile.getAbsolutePath());
         }
         FaceRecognizer lbph = opencv_face.LBPHFaceRecognizer.create();
-        if(lbphFile.exists()){
+        if (lbphFile.exists()) {
             lbph.read(lbphFile.getAbsolutePath());
         }
 
@@ -770,11 +775,11 @@ public class TrainHelper {
         List<String> eigenOutput = new ArrayList<>();
         List<String> fisherOutput = new ArrayList<>();
         List<String> lbphOutput = new ArrayList<>();
-        for(File currentFolder : folderList){
+        for (File currentFolder : folderList) {
             Log.d("Piopr", "Wykonanie dla: " + currentFolder.getName());
-            int currentId =  Integer.parseInt(currentFolder.getName().replaceAll("[^0-9]", ""));
+            int currentId = Integer.parseInt(currentFolder.getName().replaceAll("[^0-9]", ""));
             File defaultFolder = new File(currentFolder, "default");
-            if(!defaultFolder.exists()){
+            if (!defaultFolder.exists()) {
                 Toast.makeText(context, "Folder default nie istnieje", Toast.LENGTH_SHORT).show();
                 defaultFolder.mkdir();
             }
@@ -818,72 +823,71 @@ public class TrainHelper {
                         Log.d("Piopr", "Brak twarzy");
                     }
                 }
-                //TODO: dokonczyc wykrywania i predykcje oraz odpowiedni id usera;
+
             } else {
                 Log.d("Piopr", "Nie ma zdjec");
                 detectedFace = null;
             }
-            if(detectedFace!=null){
-                if(!eigenFaces.empty()){
+            if (detectedFace != null) {
+                if (!eigenFaces.empty()) {
                     IntPointer label = new IntPointer(1);
                     DoublePointer reliability = new DoublePointer(1);
                     eigenFaces.predict(detectedFace, label, reliability);
                     int prediction = label.get(0);
                     double acceptanceLevel = reliability.get(0);
                     String output;
-                    if(prediction==currentId){
-                        output = currentFolder.getName()+", "+
-                                "true, "+
+                    if (prediction == currentId) {
+                        output = currentFolder.getName() + ", " +
+                                "true, " +
                                 acceptanceLevel;
                     } else {
-                        output = currentFolder.getName()+", "+
-                                "false, "+
+                        output = currentFolder.getName() + ", " +
+                                "false, " +
                                 acceptanceLevel;
                     }
                     eigenOutput.add(output);
                 }
 
-                if(!fisherFaces.empty()){
+                if (!fisherFaces.empty()) {
                     IntPointer label = new IntPointer(1);
                     DoublePointer reliability = new DoublePointer(1);
                     fisherFaces.predict(detectedFace, label, reliability);
                     int prediction = label.get(0);
                     double acceptanceLevel = reliability.get(0);
                     String output;
-                    if(prediction==currentId){
-                        output = currentFolder.getName()+", "+
-                                "true, "+
+                    if (prediction == currentId) {
+                        output = currentFolder.getName() + ", " +
+                                "true, " +
                                 acceptanceLevel;
                     } else {
-                        output = currentFolder.getName()+", "+
-                                "false, "+
+                        output = currentFolder.getName() + ", " +
+                                "false, " +
                                 acceptanceLevel;
                     }
                     fisherOutput.add(output);
                 }
-                if(!lbph.empty()){
+                if (!lbph.empty()) {
                     IntPointer label = new IntPointer(1);
                     DoublePointer reliability = new DoublePointer(1);
                     lbph.predict(detectedFace, label, reliability);
                     int prediction = label.get(0);
                     double acceptanceLevel = reliability.get(0);
                     String output;
-                    if(prediction==currentId){
-                        output = currentFolder.getName()+", "+
-                                "true, "+
+                    if (prediction == currentId) {
+                        output = currentFolder.getName() + ", " +
+                                "true, " +
                                 acceptanceLevel;
                     } else {
-                        output = currentFolder.getName()+", "+
-                                "false, "+
+                        output = currentFolder.getName() + ", " +
+                                "false, " +
                                 acceptanceLevel;
                     }
                     lbphOutput.add(output);
                 }
 
-            }
-            else {
-                String noFaceOutput = currentFolder.getName()+", "+
-                        "false, "+
+            } else {
+                String noFaceOutput = currentFolder.getName() + ", " +
+                        "false, " +
                         0;
                 eigenOutput.add(noFaceOutput);
                 fisherOutput.add(noFaceOutput);
@@ -891,18 +895,34 @@ public class TrainHelper {
             }
 
 
-
         }
+        File eigenOutFile = new File(mainFolder, "eigenRecognize.csv");
+        File fisherOutFile = new File(mainFolder, "fisherRecognize.csv");
+        File lbphOutFile = new File(mainFolder, "lbphRecognize.csv");
 
-        for(String out : eigenOutput){
+        if(!eigenOutFile.exists()){
+            eigenOutFile.createNewFile();
+        }
+        PrintWriter pw = new PrintWriter(eigenOutFile);
+
+        for (String out : eigenOutput) {
             Log.d("Piopr", "eigen: " + out);
+            pw.println(out);
+
         }
-        for(String out : fisherOutput){
-            Log.d("Piopr", "fisher: "+out);
+        pw.close();
+        pw = new PrintWriter(fisherOutFile);
+        for (String out : fisherOutput) {
+            Log.d("Piopr", "fisher: " + out);
+            pw.println(out);
         }
-        for(String out : lbphOutput){
-            Log.d("Piopr", "lbph: "+out);
+        pw.close();
+        pw = new PrintWriter(lbphOutFile);
+        for (String out : lbphOutput) {
+            Log.d("Piopr", "lbph: " + out);
+            pw.println(out);
         }
+
 
 
     }
@@ -952,7 +972,7 @@ public class TrainHelper {
             Log.e(TAG, "Failed to load cascade classifier");
             detector = null;
         } else {
-            Log.i(TAG, "Loaded cascade classifier from " + cascadeFile.getAbsolutePath());
+            //Log.i(TAG, "Loaded cascade classifier from " + cascadeFile.getAbsolutePath());
         }
         // delete the temporary directory
         cascadeFile.delete();
@@ -980,7 +1000,7 @@ public class TrainHelper {
     }
 
     /***
-     * Listuję liste uzytkownikow.
+     * Listuję nazwy uzytkownikow.
      * @return Tablica stringow z nazwami uzyktownikow.
      */
     public static String[] getUserNames() {
@@ -1069,7 +1089,7 @@ public class TrainHelper {
     }
 
     /**
-     * Zmienia nazwy zdjec odpowiednio do patternu person.id.numerZdjecia
+     * Zmienia nazwy zdjec odpowiednio do patternu person.id.numerZdjecia w folderze uzytkownika.
      */
     public static void renamePhotos() {
 
@@ -1123,8 +1143,6 @@ public class TrainHelper {
      * @return true: jeśli istnieje wiecej, niż jeden,  false: jeśli tylko jeden zestaw zdjęć
      *
      */
-
-
     public static boolean checkCouplePersonsExists(IntIndexer idBuffer) {
         int valueToCompare = idBuffer.get(0, 0);
         for (int i = 0; i < idBuffer.rows(); i++) {
@@ -1135,7 +1153,10 @@ public class TrainHelper {
         return false;
     }
 
-
+    /***
+     * Sprawdzanie, czy istnieje plik algorytmu Fisherfaces (czy jest wytrenowany)
+     * @return
+     */
     public static boolean checkFisherExists() {
         File file = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + FISHER_FACES_CLASSIFIER);
         return file.exists();
