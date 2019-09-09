@@ -72,15 +72,11 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_imgproc.threshold;
 
-/**
- * @author djalmaafilho
- */
 public class TrainHelper {
-
     /**
      * tag logowania
      */
-    public static final String TAG = "TrainHelper";
+    public static final String TAG = "Piopr";
     /**
      * nazwa folderu przechowujacego zdjecia oraz pliki .yml
      */
@@ -91,7 +87,7 @@ public class TrainHelper {
     public static final int IMG_SIZE = 160;
     /**
      * nazwy klasyfikatorów dla każdego z algorytmów
-     */
+     **/
     public static final String EIGEN_FACES_CLASSIFIER = "eigenFacesClassifier.yml";
     public static final String FISHER_FACES_CLASSIFIER = "fisherFacesClassifier.yml";
     public static final String LBPH_CLASSIFIER = "lbphClassifier.yml";
@@ -129,15 +125,7 @@ public class TrainHelper {
         //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
         File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
 
-        Log.d("Piopr " + TAG, photosFolder.toString());
         if (photosFolder.exists()) {
-
-            FilenameFilter imageFilter = new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    return name.endsWith(".jpg") || name.endsWith(".gif") || name.endsWith(".png") || name.endsWith(".yml");
-                }
-            };
 
             FilenameFilter trainFilter = new FilenameFilter() {
                 @Override
@@ -155,10 +143,10 @@ public class TrainHelper {
     }
 
     /**
-     * sprawdzenie, czy już trenowano algorytm
-     *
-     * @param context
-     * @return
+     * Sprawdzenie, czy już trenowano algorytm
+     * Zwraca true jesli wytrenowano przynajmniej 2 algorytmy (bez Fisherface w przypadku, gdy istnieje tylko jeden zestaw zdjec).
+     * @param context - aktualne acitvity
+     * @return true, jesli wytrenowane 2/3, false jesli mniej
      */
     public static boolean isTrained(Context context) {
         try {
@@ -166,22 +154,12 @@ public class TrainHelper {
             File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
             if (photosFolder.exists()) {
 
-                FilenameFilter imageFilter = new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String name) {
-                        return name.endsWith(".jpg") || name.endsWith(".gif") || name.endsWith(".png");
-                    }
-                };
-
                 FilenameFilter trainFilter = new FilenameFilter() {
                     @Override
                     public boolean accept(File dir, String name) {
                         return name.endsWith(".yml");
                     }
                 };
-
-
-                File[] photos = photosFolder.listFiles(imageFilter);
                 File[] train = photosFolder.listFiles(trainFilter);
 
                 return train != null && train.length >= 2;
@@ -190,16 +168,13 @@ public class TrainHelper {
             }
 
         } catch (Exception e) {
-            Log.d(TAG, e.getLocalizedMessage(), e);
+            Log.d("Piopr", e.getLocalizedMessage(), e);
         }
         return false;
     }
 
-
-
-
     /**
-     * Służy oliczenie ilość plików zdjęciowych znajdujących się w folderrze treningu
+     * Zwraca ilosc zdjec w folderze uzytkownika.
      * @return - ilosc zdjęć
      */
     public static int qtdPhotosNew() {
@@ -220,26 +195,18 @@ public class TrainHelper {
     }
 
     /**
-     * Klasa służąca do treningu.
-     * Na początku sprawdza, czy istnieje folder ze zdjęciami do trenowania. Jeśli nie - zwraca false.</br>
-     * Nastepnie w zmiennej Files[] files tworzy listę zdjęć.</br>
-     * Tworzy wskaźnik na zdjęcia typu MatVector photos o rozmiarze równym ilości plików do trenowania.</br>
-     * Tworzy zbiór etykiet labels (Mat labels). Ilość wierszy: ilość plików. Ilość kolumn: 1, typu 32-bitowych shortów z jednym kanałem</br>
-     * rotulosBuffer nie wiem do czego jest potrzebny.</br>
-     * Przechodzi po liśie plików files</br>
-     * Zapisuje w timczasowej Mat photo aktualne zdjęcie w grayscale</br>
+     * Klasa służąca do treningu. <br>
+     * Trenuje wszystkie algorytmy odpowiednio nadająć id i sprawdzając rozmiary zdjęć.<br>
+     * Tworzy wskaźnik na zdjęcia photos typu MatVector o rozmiarze równym ilości plików do trenowania.</br>
+     * Tworzy zbiór etykiet labels (Mat labels). Ilość wierszy: ilość plików. Ilość kolumn: 1, typu 32-bitowych shortów z jednym kanałem
+     * Odpowiada id uzytkownika przy zdjeciu.</br>
+     * rotulosBuffer umieszcza odpowiednie id.</br>
      * classe to numer identyfikacyjny wyciągany z nazwy zdjęcia</br>
      * przeskalowuje obraz (wejsciowym jest kwadratowa twarz o nieznanych rozmiarach) na rozmiar IMG_SIZE px x IMG_SIZE px</br>
      * taki obraz umieszczany jest w liście MatVector photos</br></br>
      * <p>
-     * Tworzone są obiekty klas dla algorytmów rozpoznawania np:</br> <b>FaceRecognizer eigenfaces = opencv_face.EigenFaceRecognizer.create();</b>
-     * <p>
-     * następnie odbywa się trening: <b>eigenfaces.train(photos, labels);</b>.
      * photos to MatVector ze zdjęciami twarzy 160px x 160px
      * labels to Mat rozmiarem odpowiadajcy ilosci trenowanych zdjęć
-     * <p>
-     * <p>
-     * <p>
      * wynik treningu zapisywany jest metodą <b>eigenfaces.save(f.getAbsolutePath());</b> to pliku zdefoniowanego stałą *_FACES_CLASIFIER
      *
      * @param context
@@ -301,19 +268,7 @@ public class TrainHelper {
         }
 
 
-        //labels.create
-
-        //IntRawIndexer idBuffer = labels.createIndexer();
-        //IntBufferIndexer idBuffer = labels.createIndexer();
         IntIndexer idBuffer = labels.createIndexer();
-
-
-        //labels.
-
-
-//        FaceRecognizer eigenfaces = createEigenFaceRecognizer();
-//        FaceRecognizer fisherfaces = createFisherFaceRecognizer();
-//        FaceRecognizer lbph = createLBPHFaceRecognizer(2,9,9,9,1);
 
         FaceRecognizer eigenfaces = opencv_face.EigenFaceRecognizer.create();
         FaceRecognizer fisherfaces = opencv_face.FisherFaceRecognizer.create();
@@ -334,11 +289,8 @@ public class TrainHelper {
             fisherfaces.save(f.getAbsolutePath());
         }
 
-
-
         lbph.train(photos, labels);
 
-        Log.d("Piopr", "th: " + lbph.getThreshold());
         f = new File(photosFolder, LBPH_CLASSIFIER);
         f.createNewFile();
         lbph.save(f.getAbsolutePath());
@@ -346,6 +298,14 @@ public class TrainHelper {
         return true;
     }
 
+
+    /***
+     * Tworzenie vizualizacji z wybranych algorytmów aktualnego uzytkownika.<br>
+     *  Na moment obliczania trenowany jest na nowo algorytm rozpoznawania wyłącznie plikami aktualnego uzytkownika.
+     *  Wyswietla kazdy krok trenowania Eigenfaces w plikach eigenVectors.jpg
+     *  Wyswietla srednia twarz.
+     * @param context - aktualne activity     *
+     */
     public static void makeMeanFaces(Context context) throws Exception {
         File visPath = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + CURRENT_FOLDER + "/" + "visualizations/");
         if(!visPath.exists()){
@@ -414,15 +374,6 @@ public class TrainHelper {
         Mat fisherVectors = ((opencv_face.FisherFaceRecognizer) fisherfaces).getEigenVectors();
         Mat fisherMean = ((opencv_face.FisherFaceRecognizer) fisherfaces).getMean();
 
-        Log.d("Piopr", "Fisher cols: " + fisherVectors.cols());
-
-//        for (int i = 0; i < files.length; i++) {
-//            Mat wektorek = fisherVectors.col(i);
-//            transpose(wektorek, wektorek);
-//            Mat output = wektorek.reshape(1, 160);
-//            normalize(output, output, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
-//            imwrite(visPath + "/fisherVec" + i + ".jpg", output);
-
         fisherVectors = fisherVectors.reshape(1,160);
         normalize(fisherVectors, fisherVectors, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
         imwrite(visPath + "/fisherVec.jpg", fisherVectors);
@@ -430,8 +381,6 @@ public class TrainHelper {
         fisherMean = eigenMean.reshape(1,IMG_SIZE);
         imwrite(visPath + "/meanfisher.jpg", fisherMean);
 
-
-        //Mat
 
         lbph.train(photos,labels);
 
@@ -453,18 +402,6 @@ public class TrainHelper {
         Log.d("Piopr", "th2: " + th2);
         Log.d("Piopr", "th2: " + lbph.getThreshold());
 
-
-
-
-
-        Mat lbpout = new Mat();
-
-        threshold(photos.get(10), lbpout, 128.797, 255, 0);
-        normalize(lbpout, lbpout, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
-        imwrite(visPath+"/lbpout.jpg", lbpout);
-
-
-
         Log.d("Piopr", "radius: " + radius + ", neighbours: " + neighbours+
                 "\n gridX: "+ gridX + " gridY: " + gridY + " th: " + th);
     }
@@ -479,13 +416,13 @@ public class TrainHelper {
      * zdjęcie zapisuje się w formacie: person.personId.photonumber.jpg
      * <p>
      * użycie metody detectMultiScale() na obiekcie faceDetector:
-     * detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(150, 150), new Size(500, 500));
+     * detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(160, 160), new Size(500, 500));
      * greyMat - zdjęcie z którygo chcemy wykryć twarz
      * detectedFaces - obiekt, do którego zapisujemy współrzędne, w których została wykryta twarz na zdjęciu
      * 1.1 - współczynnik, który określa o ile wielkośc obrazu zostanie zmniejszona
      * 1 - Parametr określający, ilu sąsiadów każdy kandydujący prostokąt powinien zachować.
      * 0 - używane w starszych wersjach cascadeClassifier
-     * 150, 150 - minimalny rozmiar w pikselach fragmentu zdjęcia, na którym znajduje się twarz
+     * 160, 160 - minimalny rozmiar w pikselach fragmentu zdjęcia, na którym znajduje się twarz
      * 500, 500 - maksymalny rozmiar na zdjęciu, na którym może znaleźć się twarz
      * <p>
      * wykonuje się pętla przechodząca po wszystkich wykrytych tawrzach (zwykle, i poprawnie po jednej),
@@ -514,12 +451,8 @@ public class TrainHelper {
         opencv_core.RectVector detectedFaces = new opencv_core.RectVector();
         faceDetector.detectMultiScale(greyMat, detectedFaces, 1.1, 1, 0, new Size(160, 160), new Size(500, 500));
         for (int i = 0; i < detectedFaces.size(); i++) {
-            //TODO: zmiana funkcji, by zapisywała zdjęcia w odpowiednim folderze, obsłużenie parametru personDirName, poprawa metody qtdPhotos
-
             opencv_core.Rect rectFace = detectedFaces.get(0);
-            Log.d("Piopr", "rectFace :  " + rectFace.get());
             rectangle(rgbaMat, rectFace, new opencv_core.Scalar(0, 0, 255, 0));
-
 
             Mat capturedFace = new Mat(greyMat, rectFace);
             resize(capturedFace, capturedFace, new Size(IMG_SIZE, IMG_SIZE));
