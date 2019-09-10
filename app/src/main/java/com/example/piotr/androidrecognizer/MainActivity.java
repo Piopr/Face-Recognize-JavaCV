@@ -86,18 +86,7 @@ public class MainActivity extends AppCompatActivity {
         sprawdzBtn.setEnabled(true);
         sprawdzBtn.setOnClickListener(view -> {
             dialog.show(getFragmentManager(), "Piopr");
-            String wiadomosc;
 
-            if(usersRG.getCheckedRadioButtonId()!=-1) {
-                RadioButton selected = (RadioButton) findViewById(usersRG.getCheckedRadioButtonId());
-                wiadomosc = selected.getText().toString();
-                wiadomosc += " id: " + selected.getId();
-                makeListOfUsers();
-
-                Toast.makeText(getBaseContext(), wiadomosc, Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getBaseContext(), "Nikogo nie wybrano", Toast.LENGTH_SHORT).show();
-            }
         });
         makeListOfUsers();
 

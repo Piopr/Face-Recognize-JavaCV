@@ -268,6 +268,7 @@ public class TrainHelper {
             rotulosBuffer.put(counter, classe);
             counter++;
         }
+        Log.d("Piopr", "Przetworzono zdjęcia");
 
 
         IntIndexer idBuffer = labels.createIndexer();
@@ -282,6 +283,7 @@ public class TrainHelper {
         f.createNewFile();
         eigenfaces.save(f.getAbsolutePath());
 
+        Log.d("Piopr", "Wytrenowano eigenfaces");
 
 
         if (checkCouplePersonsExists(idBuffer)) {
@@ -290,12 +292,15 @@ public class TrainHelper {
             f.createNewFile();
             fisherfaces.save(f.getAbsolutePath());
         }
+        Log.d("Piopr", "Wytrenowano fisherfaces");
 
         lbph.train(photos, labels);
 
         f = new File(photosFolder, LBPH_CLASSIFIER);
         f.createNewFile();
         lbph.save(f.getAbsolutePath());
+        Log.d("Piopr", "Wytrenowano lbph");
+
 
         return true;
     }
@@ -545,6 +550,7 @@ public class TrainHelper {
             }
         }
         Toast.makeText(context, "Wykryto twarze na zdjeciach.", Toast.LENGTH_SHORT).show();
+        renamePhotos();
     }
 
     /***
@@ -919,9 +925,11 @@ public class TrainHelper {
         pw.close();
         pw = new PrintWriter(lbphOutFile);
         for (String out : lbphOutput) {
-            Log.d("Piopr", "lbph: " + out);
             pw.println(out);
+            Log.d("Piopr", "lbph: " + out);
+
         }
+        pw.close();
 
 
 

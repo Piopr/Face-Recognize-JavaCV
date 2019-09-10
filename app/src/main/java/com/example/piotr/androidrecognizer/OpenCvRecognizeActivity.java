@@ -2,6 +2,7 @@ package com.example.piotr.androidrecognizer;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -341,6 +342,10 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                     }
                 });
                 findViewById(R.id.btTesting).setEnabled(true);
+
+                PomocRecognizeDialog dialog = new PomocRecognizeDialog();
+                findViewById(R.id.btHelp).setOnClickListener(view ->
+                       dialog.show(getFragmentManager(), "Piopr") );
 
 
                 findViewById(R.id.loading).setVisibility(View.GONE);

@@ -51,14 +51,6 @@ import java.util.List;
 
 import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_NV21;
 
-/**
- * This is the graphical object used to display a real-time preview of the Camera.
- * It MUST be an extension of the {@link SurfaceView} class.<br />
- * It also needs to implement some other interfaces like {@link SurfaceHolder.Callback}
- * (to react to SurfaceView events)
- *
- * @author alessandrofrancesconi, hunghd
- */
 public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callback, PreviewCallback {
 
     /**
@@ -141,7 +133,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      * zmienna wątku
      */
     private Thread thread;
-    /**I
+    /**
      * interfejs obsługi zmiany podglądu i dostarczania ramek
      */
     private CvCameraViewListener listener;
@@ -150,7 +142,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      */
     private AndroidFrameConverter converterToBitmap = new AndroidFrameConverter();
     /**
-     * konwerjsa bitmapy do obiektu typu Mat (obliczenia w Java wykonywane właśnie na tej klasie).
+     * konwerjsa bitmapy do obiektu typu Mat (obliczenia w JavaCV wykonywane właśnie na tej klasie).
      */
     private OpenCVFrameConverter.ToMat converterToMat = new OpenCVFrameConverter.ToMat();
     /**
@@ -162,8 +154,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      */
     protected Frame[] cameraFrame;
     /**
-     * stan.
-     * TODO: do czego się odwołuje
+     * stan.     *
      */
     private int state = STOPPED;
     /**
@@ -230,7 +221,6 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         this.scaleType = scaleType;
         this.cameraType = camType;
 
-        // deprecated setting, but required on Android versions prior to API 11
         if (Build.VERSION.SDK_INT < 11) {
             this.surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         }
@@ -260,7 +250,6 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      */
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        /* Do nothing. Wait until surfaceChanged delivered */
     }
 
     /**
@@ -276,7 +265,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         if (this.surfaceHolder.getSurface() == null) {
-            Log.e(LOG_TAG, "surfaceChanged(): surfaceHolder is null, nothing to do.");
+
             return;
         }
 
@@ -285,11 +274,9 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
                 surfaceExist = true;
                 checkCurrentState();
             } else {
-                /** Surface changed. We need to stop camera and restart with new parameters */
-                /* Pretend that old surface has been destroyed */
                 surfaceExist = false;
                 checkCurrentState();
-                /* Now use new surface. Say we have it now */
+
                 surfaceExist = true;
                 checkCurrentState();
             }
@@ -300,7 +287,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      * Called when syncObject lock is held
      */
     private void checkCurrentState() {
-        Log.d(LOG_TAG, "call checkCurrentState");
+
         int targetState;
 
         if (enabled && surfaceExist && getVisibility() == VISIBLE) {
@@ -318,7 +305,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
     }
 
     private void processExitState(int state) {
-        Log.d(LOG_TAG, "call processExitState: " + state);
+
         switch (state) {
             case STARTED:
                 onExitStartedState();
@@ -331,7 +318,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
     }
 
     private void processEnterState(int state) {
-        Log.d(LOG_TAG, "call processEnterState: " + state);
+
         switch (state) {
             case STARTED:
                 /**
@@ -362,12 +349,12 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
     // NOTE: The order of bitmap constructor and camera connection is important for android 4.1.x
     // Bitmap must be constructed before surface
     private void onEnterStartedState() {
-        Log.d(LOG_TAG, "call onEnterStartedState");
+
         /* Connect camera */
         if (!connectCamera()) {
             AlertDialog ad = new AlertDialog.Builder(getContext()).create();
             ad.setCancelable(false); // This blocks the 'BACK' button
-            ad.setMessage("It seems that you device does not support camera (or it is locked). Application will be closed.");
+            ad.setMessage("Kamera nie jest wspierana. Zamykanie aplikacji.");
             ad.setButton(DialogInterface.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
@@ -402,7 +389,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      */
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.d(LOG_TAG, "surfaceDestroyed");
+
         synchronized (syncObject) {
             surfaceExist = false;
             checkCurrentState();
@@ -447,7 +434,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         }
 
         setMeasuredDimension(width, height);
-        Log.i(LOG_TAG, "onMeasure(): set surface dimension to " + width + "x" + height);
+
     }
 
     private boolean connectCamera() {
@@ -455,12 +442,12 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
          * 2. We need to start thread which will be getting frames
          */
         /* First step - initialize camera connection */
-        Log.d(LOG_TAG, "Connecting to camera");
+
         if (!initializeCamera())
             return false;
 
         /* now we can start update thread */
-        Log.d(LOG_TAG, "Starting processing thread");
+
         stopThread = false;
         thread = new Thread(new CameraWorker());
         thread.start();
@@ -469,17 +456,14 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
     }
 
     private void disconnectCamera() {
-        /* 1. We need to stop thread which updating the frames
-         * 2. Stop camera and release it
-         */
-        Log.d(LOG_TAG, "Disconnecting from camera");
+
         try {
             stopThread = true;
-            Log.d(LOG_TAG, "Notify thread");
+
             synchronized (this) {
                 this.notify();
             }
-            Log.d(LOG_TAG, "Wating for thread");
+
             if (thread != null)
                 thread.join();
         } catch (InterruptedException e) {
@@ -500,7 +484,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         synchronized (this) {
             if (this.cameraDevice != null) {
                 // do the job only if the camera is not already set
-                Log.i(LOG_TAG, "initializeCamera(): camera is already set, nothing to do");
+
                 return true;
             }
 
@@ -522,7 +506,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
                                 break;
                             } catch (RuntimeException e) {
                                 // something bad happened! this camera could be locked by other apps
-                                Log.e(LOG_TAG, "initializeCamera(): trying to open camera #" + i + " but it's locked", e);
+
                             }
                         }
                     }
@@ -531,7 +515,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
                     try {
                         this.cameraDevice = Camera.open(this.cameraId);
                     } catch (RuntimeException e) {
-                        Log.e(LOG_TAG, "initializeCamera(): trying to re-open camera #" + this.cameraId + " but it's locked", e);
+
                     }
                 }
             }
@@ -545,17 +529,12 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
                     this.cameraDevice = Camera.open();
                     this.cameraId = 0;
                 } catch (RuntimeException e) {
-                    // this is REALLY bad, the camera is definitely locked by the system.
-                    Log.e(LOG_TAG,
-                            "initializeCamera(): trying to open default camera but it's locked. "
-                                    + "The camera is not available for this app at the moment.", e
-                    );
+
                     return false;
                 }
             }
 
-            // here, the open() went good and the camera is available
-            Log.i(LOG_TAG, "initializeCamera(): successfully set camera #" + this.cameraId);
+
 
             setupCamera();
 
@@ -576,7 +555,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      */
     private boolean setupCamera() {
         if (cameraDevice == null) {
-            Log.e(LOG_TAG, "setupCamera(): warning, camera is null");
+
             return false;
         }
         try {
@@ -605,10 +584,6 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
                 int picWidth = cameraDevice.getParameters().getPictureSize().width;
                 int picHeight = cameraDevice.getParameters().getPictureSize().height;
 
-                Log.d(LOG_TAG, "setupCamera(): settings applied:\n\t"
-                        + "preview size: " + prevWidth + "x" + prevHeight + "\n\t"
-                        + "picture size: " + picWidth + "x" + picHeight
-                );
 
                 // here: previewBuffer initialization. It will host every frame that comes out
                 // from the preview, so it must be big enough.
@@ -617,7 +592,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
                     this.previewBuffer = new byte[prevWidth * prevHeight * ImageFormat.getBitsPerPixel(cameraDevice.getParameters().getPreviewFormat()) / 8];
                     setCameraCallback();
                 } catch (IOException e) {
-                    Log.e(LOG_TAG, "setupCamera(): error setting camera callback.", e);
+
                 }
 
                 return true;
@@ -647,7 +622,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      * @throws IOException
      */
     private void setCameraCallback() throws IOException {
-        Log.d(LOG_TAG, "setCameraCallback()");
+
         cameraDevice.addCallbackBuffer(this.previewBuffer);
         cameraDevice.setPreviewCallbackWithBuffer(this);
     }
@@ -677,10 +652,10 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
 
         if (bestSize == null) {
             bestSize = sizes.get(0);
-            Log.e(LOG_TAG, "determineBestSize(): can't find a good size. Setting to the very first...");
+
         }
 
-        Log.i(LOG_TAG, "determineBestSize(): bestSize is " + bestSize.width + "x" + bestSize.height);
+
         return bestSize;
     }
 
@@ -700,7 +675,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
             cameraDevice.startPreview();
 //            filter.start();
         } catch (Exception e) {
-            Log.e(LOG_TAG, "startCameraPreview(): error starting camera preview", e);
+
         }
     }
 
@@ -715,7 +690,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
 //            filter.stop();
         } catch (Exception e) {
             // ignored: tried to stop a non-existent preview
-            Log.i(LOG_TAG, "stopCameraPreview(): tried to stop a non-running preview, this is not an error");
+
         }
     }
 
@@ -725,7 +700,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      */
     private void updateCameraDisplayOrientation() {
         if (cameraDevice == null) {
-            Log.e(LOG_TAG, "updateCameraDisplayOrientation(): warning, camera is null");
+
             return;
         }
 
@@ -756,8 +731,6 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         }
 
         if (Build.VERSION.SDK_INT >= 9) {
-            // on >= API 9 we can proceed with the CameraInfo method
-            // and also we have to keep in mind that the camera could be the front one
             Camera.CameraInfo info = new Camera.CameraInfo();
             Camera.getCameraInfo(cameraId, info);
 
@@ -769,9 +742,6 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
                 result = (info.orientation - degrees + 360) % 360;
             }
         } else {
-            // TODO: on the majority of API 8 devices, this trick works good
-            // and doesn't produce an upside-down preview.
-            // ... but there is a small amount of devices that don't like it!
             result = Math.abs(degrees - 90);
         }
         return result;
@@ -782,8 +752,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         Camera.CameraInfo info = new Camera.CameraInfo();
         Camera.getCameraInfo(cameraId, info);
         boolean isFrontFaceCamera = info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT;
-        Log.i(LOG_TAG, "init filter with width = " + width + " and height = " + height + " and degree = "
-                + degree + " and isFrontFaceCamera = " + isFrontFaceCamera);
+
         String transposeCode;
         String formatCode = "format=pix_fmts=rgba";
         /*
@@ -818,23 +787,16 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         filter = new FFmpegFrameFilter(transposeCode + "," + formatCode, width, height);
         filter.setPixelFormat(AV_PIX_FMT_NV21);
 
-        Log.i(LOG_TAG, "filter initialize success");
+        Log.i(LOG_TAG, "inicjalizacja filtra");
     }
 
     @Override
     public void onPreviewFrame(byte[] raw, Camera cam) {
         processFrame(previewBuffer, cam);
-        // [IMPORTANT!] remember to reset the CallbackBuffer at the end of every onPreviewFrame event.
-        // Seems weird, but it works
         cam.addCallbackBuffer(previewBuffer);
     }
 
     /**
-     * [IMPORTANT!] It's the callback that's fired when a preview frame is ready. Here
-     * we can do some real-time analysis of the preview's contents.
-     * Just remember that the buffer array is a list of pixels represented in
-     * Y'UV420sp (NV21) format, so you could have to convert it to RGB before.
-     *
      * @param raw the preview buffer
      * @param cam the camera that filled the buffer
      * @see <a href="http://en.wikipedia.org/wiki/YUV#Y.27UV420sp_.28NV21.29_to_ARGB8888_conversion">YUV Conversion - Wikipedia</a>
@@ -859,7 +821,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
                             CvCameraPreview.this.wait();
                         }
                     } catch (InterruptedException e) {
-                        Log.e(LOG_TAG, "CameraWorker interrupted", e);
+
                     }
                     if (cameraFrameReady) {
                         chainIdx = 1 - chainIdx;
@@ -884,16 +846,12 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
                     }
                 }
             } while (!stopThread);
-            Log.d(LOG_TAG, "Finish processing thread");
+
         }
     }
 
     /**
-     * This method shall be called by the subclasses when they have valid
-     * object and want it to be delivered to external client (via callback) and
-     * then displayed on the screen.
-     *
-     * @param frame - the current frame to be delivered
+     * @param frame - ramkma do dostarczenia
      */
     protected void deliverAndDrawFrame(Frame frame) {
         Mat processedMat = null;
@@ -931,13 +889,15 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
 
     public interface CvCameraViewListener {
         /**
-         * This method is invoked when camera preview has started. After this method is invoked
-         * the frames will start to be delivered to client via the onCameraFrame() callback.
-         *
          * @param width  -  the width of the frames that will be delivered
          * @param height - the height of the frames that will be delivered
          */
         public void onCameraViewStarted(int width, int height);
+
+        /**
+         * wywoływana, gdy potrzebne dostarczenie ramki. Zwraca zmodyfikowaną ramkę
+         */
+        public Mat onCameraFrame(Mat mat);
 
         /**
          * metoda jest wywoływana, gdy podgląd kamery został przerwany
@@ -945,14 +905,6 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
          * No frames will be delivered via onCameraFrame() callback after this method is called.
          */
         public void onCameraViewStopped();
-
-        /**
-         * wywoływana, gdy potrzebne dostarczenie ramki. Zwraca zmodyfikowaną ramkę
-         * This method is invoked when delivery of the frame needs to be done.
-         * @return The returned values - is a modified frame which needs to be displayed on the screen.
-         * TODO: pass the parameters specifying the format of the frame (BPP, YUV or RGB and etc)
-         */
-        public Mat onCameraFrame(Mat mat);
     }
 
 }

@@ -1,9 +1,19 @@
 <resources>
     <string name="app_name">Rozpoznawanie twarzy</string>
     <string name="permission_warning">Aby kontynuowac, prosze wlaczyc uprawnienia kamery oraz uzywanie pamieci zewnetrznej.</string>
-    <string name="dismiss">Dismiss</string>
+    <string name="dismiss">Usunieto</string>
     <string name="unknown">Nieznany uzytkownik</string>
     <string name="help_message"><b>Dodaj</b> - dodaje nowego uzytkownika.\n
     <b>Usuń</b> - usuwa wybranego uzytkownika oraz jego dane \n
     <b>Rozpoznaj twarz</b> -  po wybraniu uzytkownika przechodzi do kolejnego interfejsu, w którym nastąpi rozpoznawanie twarzy.</string>
+    <string name="help_recognize_message">
+       <b>Zrob zdjecie</b> - Wykonuje zdjecie gotowe do treningu. W miarę możliwości zdjęcie wykonuj na jednolitym tle.\n
+        <b>Trening</b> - Traning algorytmów. (przy własnym zbiorze zdjęć wykonaj najpierw <b>nazwij</b> a potem <b>przetwórz</b>\n
+        <b>Reset</b> - restartuje wytrenowane algorytmy.\n
+        <b>Nazwij</b> - zmienia nazwy plików odpowiednio do wzorca person.id.nr_zdjecia\n
+        <b>Przetwórz</b> - wykrywa twarze na zbiorze zdjęć w folderze aktualnego użytkownika.\n
+        <b>Ze zdjęcia</b> - rozpoznaje osobę ze zdjęcia w folderze default na wytrenowanych algorytmach.\n
+        <b>Wizual.</b> - wykonuje wizualizację z wybranych algorytmów rozpoznawania twarzy dostępne w <b>user/visualizations</b>.\n
+        <b>Testuj</b> - wykonuje test rozpoznania na wszystkich zbiorach zdjęć. Wyniki w plikach .csv w głównym folderze.
+    </string>
 </resources>
