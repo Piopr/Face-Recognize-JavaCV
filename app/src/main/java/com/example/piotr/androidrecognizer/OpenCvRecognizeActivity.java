@@ -203,6 +203,8 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                         faceLBPH.read(f.getAbsolutePath());
 
 
+                    } else {
+                        Toast.makeText(getBaseContext(), "Algorytmy niewytrenowane.", Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
                     Log.d(TAG, e.getLocalizedMessage(), e);
@@ -309,9 +311,11 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
                     }
                 });
                 findViewById(R.id.btMean).setEnabled(true);
+                if (isTrained(getBaseContext())) {
 
-                if (!checkFisherExists()) {
-                    Toast.makeText(getBaseContext(), "Aby wytrenować algorytm Fisherfaces potrzeba przynajmniej dwóch zestawow zdjec", Toast.LENGTH_SHORT).show();
+                    if (!checkFisherExists()) {
+                        Toast.makeText(getBaseContext(), "Aby wytrenować algorytm Fisherfaces potrzeba przynajmniej dwóch zestawow zdjec", Toast.LENGTH_SHORT).show();
+                    }
                 }
 
                 /*
@@ -468,7 +472,7 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
         int x = Math.max(rectFace.tl().x() - 10, 0);
         int y = Math.max(rectFace.tl().y() - 10, 0);
 
-        if (CURRENT_IDUSER == prediction && acceptanceLevel < ACCEPT_LEVEL_LBPH) {
+        if (CURRENT_IDUSER == prediction && acceptanceLevel < ACCEPT_LEVEL) {
             putText(rgbaMat, name, new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0, 255, 0, 0));
 
         } else {
@@ -544,7 +548,8 @@ public class OpenCvRecognizeActivity extends Activity implements CvCameraPreview
     void noTrainedLabel(opencv_core.Rect face, Mat rgbaMat) {
         int x = Math.max(face.tl().x() - 10, 0);
         int y = Math.max(face.tl().y() - 10, 0);
-        putText(rgbaMat, "Algorytm niewytrenowany lub niezaladowany.", new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255,0,0,0));
+        putText(rgbaMat, "Algorytm niewytrenowany", new Point(x, y-20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255,0,0,0));
+        putText(rgbaMat, "lub niezaladowany.", new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255,0,0,0));
     }
 
     /***

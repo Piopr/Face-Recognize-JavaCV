@@ -87,14 +87,16 @@
         android:layout_height="wrap_content"
         android:text="Reset"
         android:enabled="false"
-        android:layout_gravity="bottom|right"/>
+        android:layout_gravity="bottom|right"
+        />
 
     <Button
-        android:id="@+id/btHelp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="\?"
-        android:layout_gravity="top|left"/>
+    android:id="@+id/btHelp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="\?"
+    android:layout_gravity="top|left"/>
+
 
     <ProgressBar
         android:id="@+id/loading"

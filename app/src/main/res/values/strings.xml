@@ -7,6 +7,16 @@
     <b>Usuń</b> - usuwa wybranego uzytkownika oraz jego dane \n
     <b>Rozpoznaj twarz</b> -  po wybraniu uzytkownika przechodzi do kolejnego interfejsu, w którym nastąpi rozpoznawanie twarzy.</string>
     <string name="help_recognize_message">
+        <b>Jak wykonywać zdjęcia?</b>\n
+        Jeśli wykonujesz zdjęcie w ramach aplikacji upewnij się, że Twoja twarz znajduje się w prostokącie.\n
+        <b>Istotne rzeczy:</b> \n
+        <b>światło - </b> upewnij się, że Twoja twarz jest jednakowo oświetlona. Unikaj sytuacji, gdzie twarz jest słabo widoczna, lub jej część nie jest oświetlona.\n
+        <b>tło - </b> postaraj się, aby tło na którym się znajdujesz było jednolite (np. ściana w kolorze białym).\n
+        <b>ułożenie twarzy - </b> twarz powinna być w pozycji pionowej (oczy powinny znajdować się w jednej, poziomej linii).\n
+        <b>Ilość zdjęć - </b> ilość zdjęć w ramach jednego użytkownika powinna wynosić przynajmniej 8.\n
+        <b> Niezastosowanie do któregoś z kryterium może utrudnić rozpoznawanie!</b>\n\n
+
+        <b> Interfejs</b>\n
        <b>Zrob zdjecie</b> - Wykonuje zdjecie gotowe do treningu. W miarę możliwości zdjęcie wykonuj na jednolitym tle.\n
         <b>Trening</b> - Traning algorytmów. (przy własnym zbiorze zdjęć wykonaj najpierw <b>nazwij</b> a potem <b>przetwórz</b>\n
         <b>Reset</b> - restartuje wytrenowane algorytmy.\n

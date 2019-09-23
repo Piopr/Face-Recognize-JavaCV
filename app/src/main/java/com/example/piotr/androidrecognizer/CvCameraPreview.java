@@ -434,6 +434,9 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         }
 
         setMeasuredDimension(width, height);
+        Log.d("Piopr", "Rozmiar w onMeasure width: " + width + ", height: "+ height);
+        //setRotation(90.0f);
+
 
     }
 
@@ -539,6 +542,15 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
             setupCamera();
 
             updateCameraDisplayOrientation();
+
+            int height = cameraDevice.getParameters().getPreviewSize().height;
+            int width = cameraDevice.getParameters().getPreviewSize().width;
+            Log.d("Piopr", "Height: " + height + "Width: "+ width);
+            Log.d("Piopr", "frameHeight: " + frameHeight + "frameWidth: "+ frameWidth);
+            if(width>height){
+                rotateExtra90();
+            }
+
 
             initFilter(frameWidth, frameHeight);
 
@@ -707,6 +719,16 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         int degree = getRotationDegree();
 
         cameraDevice.setDisplayOrientation(degree); // save settings
+        //cameraDevice.setDisplayOrientation(90);
+    }
+
+    private void rotateExtra90(){
+        if (cameraDevice == null) {
+
+            return;
+        }
+        cameraDevice.setDisplayOrientation(180);
+
     }
 
     private int getRotationDegree() {

@@ -30,6 +30,7 @@ import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.indexer.DoubleIndexer;
 import org.bytedeco.javacpp.indexer.IntBufferIndexer;
 import org.bytedeco.javacpp.indexer.IntIndexer;
 import org.bytedeco.javacpp.indexer.IntRawIndexer;
@@ -106,8 +107,8 @@ public class TrainHelper {
      * poniżej 4000 - rozpoznanie
      * poniżej 4000 - unknown
      */
-    public static final double ACCEPT_LEVEL = 4000.0D;
-    public static final double ACCEPT_LEVEL_LBPH = 60.0D;
+    public static final double ACCEPT_LEVEL = 5000.0D;
+    public static final double ACCEPT_LEVEL_LBPH = 70.0D;
 
     public static String CURRENT_USER;
     public static int CURRENT_IDUSER;
@@ -166,6 +167,7 @@ public class TrainHelper {
 
                 return train != null && train.length >= 2;
             } else {
+                Toast.makeText(context, "Algorytmy niewytrenowane.", Toast.LENGTH_SHORT).show();
                 return false;
             }
 
@@ -277,29 +279,65 @@ public class TrainHelper {
         FaceRecognizer fisherfaces = opencv_face.FisherFaceRecognizer.create();
         FaceRecognizer lbph = opencv_face.LBPHFaceRecognizer.create();
 
+        File trainLogs = new File("mnt/sdcard/" + TRAIN_FOLDER, "trainLogs.txt");
 
+        if(!trainLogs.exists()){
+            trainLogs.createNewFile();
+        }
+
+        long startTime;
+        long endTime;
+        long executionTime;
+
+        startTime = System.currentTimeMillis();
         eigenfaces.train(photos, labels);
         File f = new File(photosFolder, EIGEN_FACES_CLASSIFIER);
         f.createNewFile();
         eigenfaces.save(f.getAbsolutePath());
+        endTime= System.currentTimeMillis();
+        executionTime = (endTime - startTime)/1000;
+
+        PrintWriter pw = new PrintWriter(trainLogs);
+
+
+        Log.d("Piopr", "Czas wytrenowania eigenfaces w sek.: " + executionTime);
+        pw.println("Eigenfaces training time: " + executionTime);
+
+
+
+
+
 
         Log.d("Piopr", "Wytrenowano eigenfaces");
 
 
         if (checkCouplePersonsExists(idBuffer)) {
+            startTime = System.currentTimeMillis();
             fisherfaces.train(photos, labels);
             f = new File(photosFolder, FISHER_FACES_CLASSIFIER);
             f.createNewFile();
             fisherfaces.save(f.getAbsolutePath());
+            endTime = System.currentTimeMillis();
+            executionTime = (endTime - startTime)/1000;
         }
         Log.d("Piopr", "Wytrenowano fisherfaces");
+        Log.d("Piopr", "Czas wytrenowania fisherfaces w sek.: " + executionTime);
+        pw.println("Fisherfaces training time: " + executionTime);
 
+
+        startTime = System.currentTimeMillis();
         lbph.train(photos, labels);
 
         f = new File(photosFolder, LBPH_CLASSIFIER);
         f.createNewFile();
         lbph.save(f.getAbsolutePath());
         Log.d("Piopr", "Wytrenowano lbph");
+        endTime = System.currentTimeMillis();
+        executionTime = (endTime - startTime) / 1000;
+        Log.d("Piopr", "Czas wytrenowania LBPH w sek.: " + executionTime);
+        pw.println("LBPH training time: " + executionTime);
+
+        pw.close();
 
 
         return true;
@@ -370,6 +408,16 @@ public class TrainHelper {
             normalize(output, output, 0, 255, NORM_MINMAX, CV_8UC1, noArray());
             imwrite(visPath + "/eigenVec" + i + ".jpg", output);
         }
+        MatVector projekcje = ((opencv_face.EigenFaceRecognizer) eigenfaces).getProjections();
+        Log.d("Piopr", "Projekcje size: " + projekcje.size() +", cols: " + projekcje.get(0).cols() + " rows: "+
+                projekcje.get(0).rows() + "get(0).row(0).cols" + projekcje.get(0).col(0).cols()+
+                "projekcje.get.rows" + projekcje.get(0).rows());
+        DoubleIndexer projectionIndexer = projekcje.get(0).createIndexer();
+        for(int i = 0; i<files.length; i++){
+            Log.d("Piopr", "Wartość projection w " + i +
+                    ": " +projectionIndexer.get(0, i));
+        }
+
 
         eigenMean = eigenMean.reshape(1,IMG_SIZE);
         imwrite(visPath + "/meanEigen.jpg", eigenMean);
@@ -392,6 +440,7 @@ public class TrainHelper {
         lbph.train(photos,labels);
 
 
+
         MatVector histo = ((opencv_face.LBPHFaceRecognizer) lbph).getHistograms();
         Log.d("Piopr", "Histo rows: " + histo.get(0).rows());
         Log.d("Piopr", "Histo cols: " + histo.get(0).cols());
@@ -404,6 +453,9 @@ public class TrainHelper {
         int neighbours = ((opencv_face.LBPHFaceRecognizer) lbph).getNeighbors();
         int gridX = ((opencv_face.LBPHFaceRecognizer) lbph).getGridX();
         int gridY = ((opencv_face.LBPHFaceRecognizer) lbph).getGridY();
+        MatVector hists = ((opencv_face.LBPHFaceRecognizer) lbph).getHistograms();
+        Mat hist = hists.get(0);
+
         double th = lbph.getThreshold();
         double th2 = th - 1.0d;
         Log.d("Piopr", "th2: " + th2);
@@ -764,17 +816,55 @@ public class TrainHelper {
         File fisherFile = new File(mainFolder, FISHER_FACES_CLASSIFIER);
         File lbphFile = new File(mainFolder, LBPH_CLASSIFIER);
         FaceRecognizer eigenFaces = opencv_face.EigenFaceRecognizer.create();
+
+        //stworzenie pliku wyjsciowego dla logowania przewidywania
+
+        File predictLogs = new File("mnt/sdcard/" + TRAIN_FOLDER, "predictLogs.txt");
+
+        if(!predictLogs.exists()){
+            predictLogs.createNewFile();
+        }
+        PrintWriter pwLogs = new PrintWriter(predictLogs);
+
+        long startTime;
+        long endTime;
+        long executionTime;
+
+        startTime = System.currentTimeMillis();
+
         if (eigenFile.exists()) {
             eigenFaces.read(eigenFile.getAbsolutePath());
         }
+        endTime = System.currentTimeMillis();
+        executionTime = (endTime - startTime) /1000;
+
+        Log.d("Piopr", "Wczytanie eigenfaces: " + executionTime);
+        pwLogs.println("Wczytanie eigenfaces: " + executionTime);
+
         FaceRecognizer fisherFaces = opencv_face.FisherFaceRecognizer.create();
+        startTime = System.currentTimeMillis();
         if (fisherFile.exists()) {
             fisherFaces.read(fisherFile.getAbsolutePath());
         }
+        endTime = System.currentTimeMillis();
+        executionTime = (endTime - startTime) /1000;
+
+        Log.d("Piopr", "Wczytanie fisherfaces: " + executionTime);
+        pwLogs.println("Wczytanie fisherfaces: " + executionTime);
+
         FaceRecognizer lbph = opencv_face.LBPHFaceRecognizer.create();
+
+        startTime = System.currentTimeMillis();
         if (lbphFile.exists()) {
             lbph.read(lbphFile.getAbsolutePath());
         }
+        endTime = System.currentTimeMillis();
+        executionTime = (endTime - startTime) /1000;
+
+        Log.d("Piopr", "Wczytanie lbph: " + executionTime);
+        pwLogs.println("Wczytanie lbph: " + executionTime);
+
+        //pwLogs.close();
 
         Mat detectedFace = new Mat();
 
@@ -838,7 +928,15 @@ public class TrainHelper {
                 if (!eigenFaces.empty()) {
                     IntPointer label = new IntPointer(1);
                     DoublePointer reliability = new DoublePointer(1);
+
+                    startTime = System.currentTimeMillis();
                     eigenFaces.predict(detectedFace, label, reliability);
+                    endTime = System.currentTimeMillis();
+                    executionTime = (endTime - startTime) ;
+
+                    Log.d("Piopr", "Predykcja eigenfaces w ms.: " + executionTime);
+                    pwLogs.println("Predykcja eigenfaces w ms.: " + executionTime);
+
                     int prediction = label.get(0);
                     double acceptanceLevel = reliability.get(0);
                     String output;
@@ -857,7 +955,15 @@ public class TrainHelper {
                 if (!fisherFaces.empty()) {
                     IntPointer label = new IntPointer(1);
                     DoublePointer reliability = new DoublePointer(1);
+
+                    startTime = System.currentTimeMillis();
                     fisherFaces.predict(detectedFace, label, reliability);
+                    endTime = System.currentTimeMillis();
+                    executionTime = (endTime - startTime);
+
+                    Log.d("Piopr", "Predykcja fisherfaces w ms.: " + executionTime);
+                    pwLogs.println("Predykcja fisherfaces w ms.: " + executionTime);
+
                     int prediction = label.get(0);
                     double acceptanceLevel = reliability.get(0);
                     String output;
@@ -875,7 +981,16 @@ public class TrainHelper {
                 if (!lbph.empty()) {
                     IntPointer label = new IntPointer(1);
                     DoublePointer reliability = new DoublePointer(1);
+
+                    startTime = System.currentTimeMillis();
                     lbph.predict(detectedFace, label, reliability);
+                    endTime = System.currentTimeMillis();
+                    executionTime = (endTime - startTime);
+
+                    Log.d("Piopr", "Predykcja lbph w ms.: " + executionTime);
+                    pwLogs.println("Predykcja lbph w ms: " + executionTime);
+
+
                     int prediction = label.get(0);
                     double acceptanceLevel = reliability.get(0);
                     String output;
@@ -902,6 +1017,7 @@ public class TrainHelper {
 
 
         }
+        pwLogs.close();
         File eigenOutFile = new File(mainFolder, "eigenRecognize.csv");
         File fisherOutFile = new File(mainFolder, "fisherRecognize.csv");
         File lbphOutFile = new File(mainFolder, "lbphRecognize.csv");
@@ -930,6 +1046,8 @@ public class TrainHelper {
 
         }
         pw.close();
+
+
 
 
 
