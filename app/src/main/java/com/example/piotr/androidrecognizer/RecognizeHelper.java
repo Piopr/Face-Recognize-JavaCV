@@ -7,8 +7,6 @@
 package com.example.piotr.androidrecognizer;
 
 import android.content.Context;
-import android.os.AsyncTask;
-import android.os.SystemClock;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -22,18 +20,14 @@ import java.io.PrintWriter;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.bytedeco.javacpp.opencv_core.CV_32SC1;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.indexer.DoubleIndexer;
-import org.bytedeco.javacpp.indexer.IntBufferIndexer;
 import org.bytedeco.javacpp.indexer.IntIndexer;
-import org.bytedeco.javacpp.indexer.IntRawIndexer;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_core.Mat;
 import org.bytedeco.javacpp.opencv_core.MatVector;
@@ -41,15 +35,9 @@ import org.bytedeco.javacpp.opencv_core.Size;
 import org.bytedeco.javacpp.opencv_face;
 import org.bytedeco.javacpp.opencv_face.FaceRecognizer;
 import org.bytedeco.javacpp.opencv_objdetect;
-import org.bytedeco.javacpp.opencv_tracking;
-import org.bytedeco.javacv.FrameFilter;
-import org.opencv.core.MatOfInt;
-import org.opencv.core.Range;
 
 
-import static org.bytedeco.javacpp.opencv_core.CV_8U;
 import static org.bytedeco.javacpp.opencv_core.CV_8UC1;
-import static org.bytedeco.javacpp.opencv_core.GEMM_2_T;
 import static org.bytedeco.javacpp.opencv_core.NORM_MINMAX;
 import static org.bytedeco.javacpp.opencv_core.PCACompute;
 import static org.bytedeco.javacpp.opencv_core.PCACompute2;
@@ -64,9 +52,6 @@ import static org.bytedeco.javacpp.opencv_core.shiftLeft;
 import static org.bytedeco.javacpp.opencv_core.subtract;
 import static org.bytedeco.javacpp.opencv_core.transpose;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
-import static org.bytedeco.javacpp.opencv_imgproc.COLOR_GRAY2BGR;
-import static org.bytedeco.javacpp.opencv_imgproc.COLOR_GRAY2BGRA;
-import static org.bytedeco.javacpp.opencv_imgproc.COLOR_GRAY2RGB;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 import static org.bytedeco.javacpp.opencv_imgcodecs.CV_LOAD_IMAGE_GRAYSCALE;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
@@ -75,7 +60,7 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
 import static org.bytedeco.javacpp.opencv_imgproc.threshold;
 
-public class TrainHelper {
+public class RecognizeHelper {
     /**
      * tag logowania
      */
@@ -183,7 +168,7 @@ public class TrainHelper {
      */
     public static int qtdPhotosNew() {
         //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
-        File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER + "/" + TrainHelper.CURRENT_FOLDER);
+        File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER);
         if (photosFolder.exists()) {
             FilenameFilter imageFilter = new FilenameFilter() {
                 @Override
@@ -558,7 +543,7 @@ public class TrainHelper {
         if (!folder.exists())
             folder.mkdirs();
 
-        File[] allPhotos = TrainHelper.listPhotos();
+        File[] allPhotos = RecognizeHelper.listPhotos();
         if (allPhotos.length == 0 || allPhotos == null) {
             Toast.makeText(context, "Brak zdjec do przetworzenia", Toast.LENGTH_SHORT).show();
             return;
@@ -619,9 +604,9 @@ public class TrainHelper {
         IS_TRAINED = false;
 
         Log.d("Piopr", "Funkcja recognizeFromPhoto");
-        File currentFolder = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + TrainHelper.CURRENT_FOLDER + "/default");
+        File currentFolder = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER + "/default");
         opencv_objdetect.CascadeClassifier faceDetector;
-        String[] usersNamesArray = TrainHelper.getUserNames();
+        String[] usersNamesArray = RecognizeHelper.getUserNames();
         Mat detectedFace = new Mat();
 
 
@@ -1111,7 +1096,7 @@ public class TrainHelper {
      * @return lista z id
      */
     public static Integer[] getUserIds() {
-        File trainFolder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        File trainFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
         String[] users = trainFolder.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -1130,7 +1115,7 @@ public class TrainHelper {
      * @return Tablica stringow z nazwami uzyktownikow.
      */
     public static String[] getUserNames() {
-        File trainFolder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        File trainFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
         String[] users = trainFolder.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -1196,7 +1181,7 @@ public class TrainHelper {
      * @return - tablica String[] zawierająca wszyskie pliki zdjęciowe w folderze.
      */
     public static File[] listPhotos() {
-        File currentFolder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER + "/" + TrainHelper.CURRENT_FOLDER);
+        File currentFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER);
 
         FilenameFilter imageFilter = new FilenameFilter() {
             @Override
@@ -1221,7 +1206,7 @@ public class TrainHelper {
 
         int photoNr = 0;
 
-        File currentFolder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER + "/" + TrainHelper.CURRENT_FOLDER);
+        File currentFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER);
 
         FilenameFilter imageFilter = new FilenameFilter() {
             @Override
@@ -1234,7 +1219,7 @@ public class TrainHelper {
         int i = 0;
         for (File f : allPhotosArray) {
             i++;
-            File name = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + TrainHelper.CURRENT_FOLDER, "tmp" + i + ".jpg");
+            File name = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER, "tmp" + i + ".jpg");
             f.renameTo(name);
         }
 
@@ -1242,7 +1227,7 @@ public class TrainHelper {
 
         for (File f : allPhotosArray) {
             photoNr++;
-            File newName = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + TrainHelper.CURRENT_FOLDER, String.format(FILE_NAME_PATTERN, TrainHelper.CURRENT_IDUSER, photoNr));
+            File newName = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER, String.format(FILE_NAME_PATTERN, RecognizeHelper.CURRENT_IDUSER, photoNr));
 
             if (f.renameTo(newName)) {
                 Log.d("Piopr", "Zmieniono: " + f.getAbsolutePath());

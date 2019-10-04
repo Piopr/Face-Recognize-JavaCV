@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         if (!mPermissionReady)
             requirePermissions(); //jesli nie nadano uprawnien, prosba o nadanie
         //tworzenie głównego folderu "train folder"
-        File folder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        File folder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
         if(!folder.exists()){
         folder.mkdir();}
 
@@ -65,11 +65,11 @@ public class MainActivity extends AppCompatActivity {
                     RadioButton selected = (RadioButton) findViewById(usersRG.getCheckedRadioButtonId());
                     String username = selected.getText().toString();
                     saveIdAndName(username);
-                    Log.d("Piopr", "Nazwa usera: " + TrainHelper.CURRENT_USER +" id: " + TrainHelper.CURRENT_IDUSER);
+                    Log.d("Piopr", "Nazwa usera: " + RecognizeHelper.CURRENT_USER +" id: " + RecognizeHelper.CURRENT_IDUSER);
                     //deleteUser(username);
 
                     if (mPermissionReady) { //warunek, czy nadano uprawnienia
-                        startActivity(new Intent(MainActivity.this, OpenCvRecognizeActivity.class)); //zmiana widoku
+                        startActivity(new Intent(MainActivity.this, RecognizeActivity.class)); //zmiana widoku
                     }
                 }
 
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
 
-                File folder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+                File folder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
                 EditText userEditText = (EditText) findViewById(R.id.nazwa);
                 String nameOfUser = userEditText.getText().toString().toLowerCase();
                 if(nameOfUser.isEmpty()){
@@ -165,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void makeListOfUsers() {
-        File folder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        File folder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
         String[] users = folder.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
     void makeNewUser(String username){
-        File trainFolder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        File trainFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
         String[] users = trainFolder.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void deleteUser(String username){
-        File trainFolder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        File trainFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
         String[] userList = trainFolder.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -294,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void saveIdAndName(String username){
-        File trainFolder = new File("/mnt/sdcard/", TrainHelper.TRAIN_FOLDER);
+        File trainFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
         String[] userList = trainFolder.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -306,10 +306,10 @@ public class MainActivity extends AppCompatActivity {
         String[] userNames = getUserNames(userList);
         int indexOfFound = Arrays.asList(userNames).indexOf(username);
 
-        TrainHelper.CURRENT_IDUSER = Arrays.asList(userIds).get(indexOfFound);
-        TrainHelper.CURRENT_USER = Arrays.asList(userNames).get(indexOfFound);
-        TrainHelper.CURRENT_FOLDER = TrainHelper.CURRENT_IDUSER+TrainHelper.CURRENT_USER;
-        Log.d("Piopr", "Aktualny folder: " + TrainHelper.CURRENT_FOLDER);
+        RecognizeHelper.CURRENT_IDUSER = Arrays.asList(userIds).get(indexOfFound);
+        RecognizeHelper.CURRENT_USER = Arrays.asList(userNames).get(indexOfFound);
+        RecognizeHelper.CURRENT_FOLDER = RecognizeHelper.CURRENT_IDUSER+ RecognizeHelper.CURRENT_USER;
+        Log.d("Piopr", "Aktualny folder: " + RecognizeHelper.CURRENT_FOLDER);
     }
 
 }

@@ -43,7 +43,6 @@ import org.bytedeco.javacv.FFmpegFrameFilter;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameFilter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
-import org.opencv.imgcodecs.Imgcodecs;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -51,7 +50,7 @@ import java.util.List;
 
 import static org.bytedeco.javacpp.avutil.AV_PIX_FMT_NV21;
 
-public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callback, PreviewCallback {
+public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, PreviewCallback {
 
     /**
      * LOG_TAG - nazwa tagu do logowania
@@ -86,7 +85,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      * by the Camera object. Note that this should not be intended as
      * the final, exact, dimension because the device could not support
      * it and a lower value is required (but the aspect ratio should remain the same).<br />
-     * See {@link CvCameraPreview#getBestSize(List, int)} for more information.
+     * See {@link CameraPreview#getBestSize(List, int)} for more information.
      */
     private final int PREVIEW_MAX_WIDTH = 640;
 
@@ -192,22 +191,22 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      * @param context - aktualny widok
      * @param attrs - atrybuty (pobierane z opencv.xml)
      */
-    public CvCameraPreview(Context context, AttributeSet attrs) {
+    public CameraPreview(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         /**
          * pobieranie wartości z pliku /values/attrs.xml
          */
-        TypedArray array = getContext().obtainStyledAttributes(attrs, R.styleable.CvCameraPreview);
-        int camType = array.getInt(R.styleable.CvCameraPreview_camera_type, CAMERA_BACK);
-        int scaleType = array.getInt(R.styleable.CvCameraPreview_scale_type, SCALE_FIT);
+        TypedArray array = getContext().obtainStyledAttributes(attrs, R.styleable.CameraPreview);
+        int camType = array.getInt(R.styleable.CameraPreview_camera_type, CAMERA_BACK);
+        int scaleType = array.getInt(R.styleable.CameraPreview_scale_type, SCALE_FIT);
         array.recycle();
 
         initializer(camType == CAMERA_BACK ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT, scaleType);
 
     }
 
-    public CvCameraPreview(Context context, int camType, int scaleType) {
+    public CameraPreview(Context context, int camType, int scaleType) {
         super(context);
 
         initializer(camType == CAMERA_BACK ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT, scaleType);
@@ -254,7 +253,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
 
     /**
      * [IMPORTANT!] A SurfaceChanged event means that the parent graphic has changed its layout
-     * (for example when the orientation changes). It's necessary to update the {@link CvCameraPreview}
+     * (for example when the orientation changes). It's necessary to update the {@link CameraPreview}
      * orientation, so the preview is stopped, then updated, then re-activated.
      *
      * @param holder The SurfaceHolder whose surface has changed
@@ -403,7 +402,7 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
      * where the preview is printed: if its ratio is different from the
      * original one, it results in errors like "startPreview failed".<br />
      * This methods takes care on this and applies the right size to the
-     * {@link CvCameraPreview}.
+     * {@link CameraPreview}.
      *
      * @param widthMeasureSpec  horizontal space requirements as imposed by the parent.
      * @param heightMeasureSpec vertical space requirements as imposed by the parent.
@@ -837,10 +836,10 @@ public class CvCameraPreview extends SurfaceView implements SurfaceHolder.Callba
         public void run() {
             do {
                 boolean hasFrame = false;
-                synchronized (CvCameraPreview.this) {
+                synchronized (CameraPreview.this) {
                     try {
                         while (!cameraFrameReady && !stopThread) {
-                            CvCameraPreview.this.wait();
+                            CameraPreview.this.wait();
                         }
                     } catch (InterruptedException e) {
 

@@ -26,7 +26,7 @@
         </activity>
 
         <activity
-            android:name=".OpenCvRecognizeActivity"
+            android:name=".RecognizeActivity"
             android:screenOrientation="portrait" />
     </application>
 
