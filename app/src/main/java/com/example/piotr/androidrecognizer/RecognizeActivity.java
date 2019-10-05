@@ -346,7 +346,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
                 });
                 findViewById(R.id.btTesting).setEnabled(true);
 
-                PomocRecognizeDialog dialog = new PomocRecognizeDialog();
+                HelpRecognizeDialog dialog = new HelpRecognizeDialog();
                 findViewById(R.id.btHelp).setOnClickListener(view ->
                        dialog.show(getFragmentManager(), "Piopr") );
 

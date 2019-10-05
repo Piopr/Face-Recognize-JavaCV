@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        PomocDialog dialog = new PomocDialog();
+        HelpDialog dialog = new HelpDialog();
 
         Button sprawdzBtn = (Button) findViewById(R.id.sprawdz);
         sprawdzBtn.setEnabled(true);
