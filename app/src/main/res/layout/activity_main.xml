@@ -45,9 +45,10 @@
         android:layout_height="match_parent"
         android:fillViewport="true"
         android:layout_weight=".80"
-        android:fadeScrollbars="true">
+        android:fadeScrollbars="true"
+        tools:ignore="ExtraText">
 
-        >
+
 
         <!--<LinearLayout-->
             <!--android:layout_width="match_parent"-->

@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean mPermissionReady; //zmienna do kontroli nadanych uprawnien
     private RadioGroup usersRG;
+    private final String savePath = "/mnt/sdcard/";
 
     //TODO: przekazywanie id uzytkownika do nastepnego activity, wybranie folderu w ktorym beda przechowywane zdjecia
     @Override
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         if (!mPermissionReady)
             requirePermissions(); //jesli nie nadano uprawnien, prosba o nadanie
         //tworzenie głównego folderu "train folder"
-        File folder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
+        File folder = new File(savePath, RecognizeHelper.TRAIN_FOLDER);
         if(!folder.exists()){
         folder.mkdir();}
 
@@ -91,14 +92,14 @@ public class MainActivity extends AppCompatActivity {
         makeListOfUsers();
 
 
-        Button dodajBtn = (Button) findViewById(R.id.dodaj);
+        Button dodajBtn = findViewById(R.id.dodaj);
         dodajBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
 
-                File folder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
-                EditText userEditText = (EditText) findViewById(R.id.nazwa);
+                File folder = new File(savePath, RecognizeHelper.TRAIN_FOLDER);
+                EditText userEditText = findViewById(R.id.nazwa);
                 String nameOfUser = userEditText.getText().toString().toLowerCase();
                 if(nameOfUser.isEmpty()){
                     Toast.makeText(getBaseContext(), "Puste pole tekstowe.", Toast.LENGTH_LONG).show();
@@ -114,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        Button usunBtn = (Button) findViewById(R.id.usun);
+        Button usunBtn = findViewById(R.id.usun);
         usunBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -123,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getBaseContext(), "Nie wybrano uzytkownika lub juz nie istnieje.", Toast.LENGTH_LONG).show();
                     makeListOfUsers();
                 } else {
-                    RadioButton selected = (RadioButton) findViewById(usersRG.getCheckedRadioButtonId());
+                    RadioButton selected = findViewById(usersRG.getCheckedRadioButtonId());
                     String username = selected.getText().toString();
                     deleteUser(username);
                 }
@@ -165,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void makeListOfUsers() {
-        File folder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
+        File folder = new File(savePath, RecognizeHelper.TRAIN_FOLDER);
         String[] users = folder.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -188,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
     void makeNewUser(String username){
-        File trainFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
+        File trainFolder = new File(savePath, RecognizeHelper.TRAIN_FOLDER);
         String[] users = trainFolder.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -233,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void deleteUser(String username){
-        File trainFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
+        File trainFolder = new File(savePath, RecognizeHelper.TRAIN_FOLDER);
         String[] userList = trainFolder.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -294,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void saveIdAndName(String username){
-        File trainFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
+        File trainFolder = new File(savePath, RecognizeHelper.TRAIN_FOLDER);
         String[] userList = trainFolder.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {

@@ -129,6 +129,8 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
     /**     *
      * metoda sprawdzania uprawnien. Zwraca true gdy wszystkie wymagane uprawnienia są nadane
      */
+    private final String savePath = "/mnt/sdcard/";
+
     private boolean hasPermissions(Context context, String... permissions) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
             for (String permission : permissions) {
@@ -159,7 +161,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
         /*
         wczytanie z activity zmiennej obsługującej podgląd kamery (wykrywanie twarzy itd.)
          */
-        cameraView = (CameraPreview) findViewById(R.id.camera_view);
+        cameraView = findViewById(R.id.camera_view);
         cameraView.setCvCameraViewListener(this);
 
         /*
@@ -179,14 +181,14 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
             protected Void doInBackground(Void... voids) {
 
                 try {
-                    /***
+                    /*
                      * wczytanie wzorca do detekcji twarzy
                      */
                     faceDetector = RecognizeHelper.loadClassifierCascade(RecognizeActivity.this, R.raw.frontalface);
                     //Wczytanie z plikow (jesli istnieja), plikow z wytrenowanymi algorytmami.
                     //Wymagane 3 lub 2 (w przypadku, gdy tylko 1 zestaw zdjec nie mozna wytrenowac FisherFaces)
                     if (RecognizeHelper.isTrained(getBaseContext())) {
-                        File folder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
+                        File folder = new File(savePath, RecognizeHelper.TRAIN_FOLDER);
                         File f = new File(folder, RecognizeHelper.EIGEN_FACES_CLASSIFIER);
                         faceEigen.read(f.getAbsolutePath());
                         //Sprawdzenie, czy jest wytrenowany
@@ -249,7 +251,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
                 });
                 findViewById(R.id.btTrain).setEnabled(true);
 
-                /**
+                /*
                  Resetowanie algorytmow (bez usuwania zdjec).
                  Po zakończeniu powrót do poprzedniego acitvity
                  */

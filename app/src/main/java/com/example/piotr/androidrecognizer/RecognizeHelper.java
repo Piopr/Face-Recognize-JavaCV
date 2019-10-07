@@ -39,17 +39,9 @@ import org.bytedeco.javacpp.opencv_objdetect;
 
 import static org.bytedeco.javacpp.opencv_core.CV_8UC1;
 import static org.bytedeco.javacpp.opencv_core.NORM_MINMAX;
-import static org.bytedeco.javacpp.opencv_core.PCACompute;
-import static org.bytedeco.javacpp.opencv_core.PCACompute2;
-import static org.bytedeco.javacpp.opencv_core.add;
 import static org.bytedeco.javacpp.opencv_core.cvRound;
-import static org.bytedeco.javacpp.opencv_core.eigen;
-import static org.bytedeco.javacpp.opencv_core.gemm;
 import static org.bytedeco.javacpp.opencv_core.noArray;
 import static org.bytedeco.javacpp.opencv_core.normalize;
-import static org.bytedeco.javacpp.opencv_core.read;
-import static org.bytedeco.javacpp.opencv_core.shiftLeft;
-import static org.bytedeco.javacpp.opencv_core.subtract;
 import static org.bytedeco.javacpp.opencv_core.transpose;
 import static org.bytedeco.javacpp.opencv_imgcodecs.imwrite;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
@@ -58,9 +50,10 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.imread;
 import static org.bytedeco.javacpp.opencv_imgproc.CV_BGR2GRAY;
 import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.resize;
-import static org.bytedeco.javacpp.opencv_imgproc.threshold;
 
 public class RecognizeHelper {
+
+    private static final String savePath = "/mnt/sdcard/";
     /**
      * tag logowania
      */
@@ -111,7 +104,7 @@ public class RecognizeHelper {
      */
     public static void reset(Context context) throws Exception {
         //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
-        File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
+        File photosFolder = new File(savePath, TRAIN_FOLDER);
 
         if (photosFolder.exists()) {
 
@@ -139,7 +132,7 @@ public class RecognizeHelper {
     public static boolean isTrained(Context context) {
         try {
             //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
-            File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
+            File photosFolder = new File(savePath, TRAIN_FOLDER);
             if (photosFolder.exists()) {
 
                 FilenameFilter trainFilter = new FilenameFilter() {
@@ -168,7 +161,7 @@ public class RecognizeHelper {
      */
     public static int qtdPhotosNew() {
         //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
-        File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER);
+        File photosFolder = new File(savePath, TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER);
         if (photosFolder.exists()) {
             FilenameFilter imageFilter = new FilenameFilter() {
                 @Override
@@ -198,13 +191,13 @@ public class RecognizeHelper {
      * labels to Mat rozmiarem odpowiadajcy ilosci trenowanych zdjęć
      * wynik treningu zapisywany jest metodą <b>eigenfaces.save(f.getAbsolutePath());</b> to pliku zdefoniowanego stałą *_FACES_CLASIFIER
      *
-     * @param context
+     * @param context właściwość widoku
      * @return zwraca bool. Prawda, gdy istnieją obrazy do trenowania i wykonano trening, false, gdy zdjęcia nie istnieją
      */
     public static boolean train(Context context) throws Exception {
 
         //File photosFolder = new File(context.getFilesDir(), TRAIN_FOLDER);
-        File photosFolder = new File("/mnt/sdcard/", TRAIN_FOLDER);
+        File photosFolder = new File(savePath, TRAIN_FOLDER);
         if (!photosFolder.exists()) return false;
 
         FilenameFilter imageFilter = new FilenameFilter() {
@@ -337,7 +330,7 @@ public class RecognizeHelper {
      * @param context - aktualne activity     *
      */
     public static void makeMeanFaces(Context context) throws Exception {
-        File visPath = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + CURRENT_FOLDER + "/" + "visualizations/");
+        File visPath = new File(savePath + TRAIN_FOLDER + "/" + CURRENT_FOLDER + "/" + "visualizations/");
         if(!visPath.exists()){
             visPath.mkdir();
         }
@@ -349,7 +342,7 @@ public class RecognizeHelper {
             }
         };
 
-        File userphotosFolder = new File("/mnt/sdcard/"+TRAIN_FOLDER, CURRENT_FOLDER);
+        File userphotosFolder = new File(savePath+TRAIN_FOLDER, CURRENT_FOLDER);
         File[] files = userphotosFolder.listFiles(imageFilter);
         if(files.length<1){
             Log.d("Piopr", "Brak zdjec!");
@@ -377,6 +370,7 @@ public class RecognizeHelper {
 
 
 
+        //opencv_face.FaceRecognizer eigenfaces = opencv_face.EigenFaceRecognizer.create();
         opencv_face.FaceRecognizer eigenfaces = opencv_face.EigenFaceRecognizer.create();
         opencv_face.FaceRecognizer fisherfaces = opencv_face.FisherFaceRecognizer.create();
         opencv_face.FaceRecognizer lbph = opencv_face.LBPHFaceRecognizer.create();
@@ -482,7 +476,7 @@ public class RecognizeHelper {
     public static void takePhoto(Context context, int personId, int photoNumber, Mat rgbaMat, opencv_objdetect.CascadeClassifier faceDetector, String personDirName) throws Exception {
         //File folder = new File(context.getFilesDir(), TRAIN_FOLDER);
 
-        File folder = new File("/mnt/sdcard/", TRAIN_FOLDER + "/" + personDirName);
+        File folder = new File(savePath, TRAIN_FOLDER + "/" + personDirName);
         Log.d("Piopr", folder.toString());
         if (folder.exists() && !folder.isDirectory())
             folder.delete();
@@ -536,7 +530,7 @@ public class RecognizeHelper {
      */
     public static void detectFaceFromPhotos(Context context, opencv_objdetect.CascadeClassifier faceDetector, String personDirName) throws Exception {
         //File folder = new File(context.getFilesDir(), TRAIN_FOLDER);
-        File folder = new File("/mnt/sdcard/", TRAIN_FOLDER + "/" + personDirName);
+        File folder = new File(savePath, TRAIN_FOLDER + "/" + personDirName);
         Log.d("Piopr", folder.toString());
         if (folder.exists() && !folder.isDirectory())
             folder.delete();
@@ -604,7 +598,7 @@ public class RecognizeHelper {
         IS_TRAINED = false;
 
         Log.d("Piopr", "Funkcja recognizeFromPhoto");
-        File currentFolder = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER + "/default");
+        File currentFolder = new File(savePath + TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER + "/default");
         opencv_objdetect.CascadeClassifier faceDetector;
         String[] usersNamesArray = RecognizeHelper.getUserNames();
         Mat detectedFace = new Mat();
@@ -681,7 +675,7 @@ public class RecognizeHelper {
             Toast.makeText(context, "Algorytm niewytrenowany", Toast.LENGTH_SHORT).show();
             return;
         }
-        File trainfolder = new File("/mnt/sdcard/" + TRAIN_FOLDER);
+        File trainfolder = new File(savePath + TRAIN_FOLDER);
         File eigenFile = new File(trainfolder, EIGEN_FACES_CLASSIFIER);
         File fisherFile = new File(trainfolder, FISHER_FACES_CLASSIFIER);
         File lbphFile = new File(trainfolder, LBPH_CLASSIFIER);
@@ -744,11 +738,7 @@ public class RecognizeHelper {
                 lbphText = "Witaj " + usersNamesArray[prediction] + "! " +
                         cvRound(acceptanceLevel) + "id: " +
                         prediction + "\n";
-                if (CURRENT_IDUSER == prediction) {
-                    VERIFIED = true;
-                } else {
-                    VERIFIED = false;
-                }
+                VERIFIED = CURRENT_IDUSER == prediction;
             }
         }
 
@@ -773,11 +763,11 @@ public class RecognizeHelper {
      *
      *   <br>
      *       Wynik zapisywany jest do plików .cvs w folderze głównym.
-     * @param context
+     * @param context właściwość widoku
      */
     public static void predictTest(Context context) throws Exception {
         String outputText = "";
-        File mainFolder = new File("/mnt/sdcard/" + TRAIN_FOLDER);
+        File mainFolder = new File(savePath + TRAIN_FOLDER);
         FileFilter directoryFilter = new FileFilter() {
             @Override
             public boolean accept(File file) {
@@ -1096,7 +1086,7 @@ public class RecognizeHelper {
      * @return lista z id
      */
     public static Integer[] getUserIds() {
-        File trainFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
+        File trainFolder = new File(savePath, RecognizeHelper.TRAIN_FOLDER);
         String[] users = trainFolder.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -1115,7 +1105,7 @@ public class RecognizeHelper {
      * @return Tablica stringow z nazwami uzyktownikow.
      */
     public static String[] getUserNames() {
-        File trainFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER);
+        File trainFolder = new File(savePath, RecognizeHelper.TRAIN_FOLDER);
         String[] users = trainFolder.list(new FilenameFilter() {
             @Override
             public boolean accept(File current, String name) {
@@ -1181,7 +1171,7 @@ public class RecognizeHelper {
      * @return - tablica String[] zawierająca wszyskie pliki zdjęciowe w folderze.
      */
     public static File[] listPhotos() {
-        File currentFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER);
+        File currentFolder = new File(savePath, RecognizeHelper.TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER);
 
         FilenameFilter imageFilter = new FilenameFilter() {
             @Override
@@ -1206,7 +1196,7 @@ public class RecognizeHelper {
 
         int photoNr = 0;
 
-        File currentFolder = new File("/mnt/sdcard/", RecognizeHelper.TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER);
+        File currentFolder = new File(savePath, RecognizeHelper.TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER);
 
         FilenameFilter imageFilter = new FilenameFilter() {
             @Override
@@ -1219,7 +1209,7 @@ public class RecognizeHelper {
         int i = 0;
         for (File f : allPhotosArray) {
             i++;
-            File name = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER, "tmp" + i + ".jpg");
+            File name = new File(savePath + TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER, "tmp" + i + ".jpg");
             f.renameTo(name);
         }
 
@@ -1227,7 +1217,7 @@ public class RecognizeHelper {
 
         for (File f : allPhotosArray) {
             photoNr++;
-            File newName = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER, String.format(FILE_NAME_PATTERN, RecognizeHelper.CURRENT_IDUSER, photoNr));
+            File newName = new File(savePath + TRAIN_FOLDER + "/" + RecognizeHelper.CURRENT_FOLDER, String.format(FILE_NAME_PATTERN, RecognizeHelper.CURRENT_IDUSER, photoNr));
 
             if (f.renameTo(newName)) {
                 Log.d("Piopr", "Zmieniono: " + f.getAbsolutePath());
@@ -1266,10 +1256,10 @@ public class RecognizeHelper {
 
     /***
      * Sprawdzanie, czy istnieje plik algorytmu Fisherfaces (czy jest wytrenowany)
-     * @return
+     * @return true jesli istnieje
      */
     public static boolean checkFisherExists() {
-        File file = new File("/mnt/sdcard/" + TRAIN_FOLDER + "/" + FISHER_FACES_CLASSIFIER);
+        File file = new File(savePath + TRAIN_FOLDER + "/" + FISHER_FACES_CLASSIFIER);
         return file.exists();
     }
 

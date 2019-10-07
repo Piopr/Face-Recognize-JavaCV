@@ -212,6 +212,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         initializer(camType == CAMERA_BACK ? Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT, scaleType);
     }
 
+    @SuppressWarnings("deprecation")
     private void initializer(int camType, int scaleType) {
 
         this.surfaceHolder = this.getHolder();
@@ -313,7 +314,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 onExitStoppedState();
                 break;
         }
-        ;
     }
 
     private void processEnterState(int state) {
