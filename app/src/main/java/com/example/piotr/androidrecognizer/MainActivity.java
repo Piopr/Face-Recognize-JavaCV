@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private RadioGroup usersRG;
     private final String savePath = "/mnt/sdcard/";
 
-    //TODO: przekazywanie id uzytkownika do nastepnego activity, wybranie folderu w ktorym beda przechowywane zdjecia
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
