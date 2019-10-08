@@ -87,6 +87,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
      */
     private String[] usersNamesArray;// = TrainHelper.getUserNames();
 
+
     /**
      * Zawiera id uzytkownikow
      */
@@ -163,6 +164,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
          */
         cameraView = findViewById(R.id.camera_view);
         cameraView.setCvCameraViewListener(this);
+
 
         /*
         Zaladowanie nazw i id userow (stworzonych folderow)
@@ -571,7 +573,6 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
                     new Size(4 * absoluteFaceSize, 4 * absoluteFaceSize));
 
             if (faces.size() == 1) {
-
                 if (takePhoto) {
                     capturePhoto(rgbaMat);
                     alertQtyPhotos();

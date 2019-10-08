@@ -30,12 +30,12 @@ public class MainActivity extends AppCompatActivity {
     private RadioGroup usersRG;
     private final String savePath = "/mnt/sdcard/";
 
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        Log.d("Piopr", "dzialaj no");
+
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_main); //ustawienie widoku

@@ -1034,6 +1034,7 @@ public class RecognizeHelper {
     /**
      * załadowanie kaskady do detekcji twarzy
      */
+
     public static opencv_objdetect.CascadeClassifier loadClassifierCascade(Context context, int resId) {
         FileOutputStream fos = null;
         InputStream inputStream;
