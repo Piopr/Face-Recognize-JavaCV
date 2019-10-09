@@ -234,18 +234,17 @@ public class RecognizeHelper {
             Log.d("Piopr", f.getAbsolutePath());
         }
 
-        //File[] files = photosFolder.listFiles(imageFilter);
+
         MatVector photos = new MatVector(files.length);
         Mat labels = new Mat(files.length, 1, CV_32SC1);
-        IntBuffer rotulosBuffer = labels.createBuffer();
+        IntBuffer idsBuffer = labels.createBuffer();
         counter = 0;
         for (File image : files) {
             Mat photo = imread(image.getAbsolutePath(), CV_LOAD_IMAGE_GRAYSCALE);
-            int classe = Integer.parseInt(image.getName().split("\\.")[1]);
-            //Log.d("Piopr", "Numer id: " + classe);
+            int userIdOfPhoto = Integer.parseInt(image.getName().split("\\.")[1]);
             resize(photo, photo, new Size(IMG_SIZE, IMG_SIZE));
             photos.put(counter, photo);
-            rotulosBuffer.put(counter, classe);
+            idsBuffer.put(counter, userIdOfPhoto);
             counter++;
         }
         Log.d("Piopr", "Przetworzono zdjęcia");
@@ -266,6 +265,7 @@ public class RecognizeHelper {
         long startTime;
         long endTime;
         long executionTime;
+
 
         startTime = System.currentTimeMillis();
         eigenfaces.train(photos, labels);
@@ -304,8 +304,8 @@ public class RecognizeHelper {
 
 
         startTime = System.currentTimeMillis();
-        lbph.train(photos, labels);
 
+        lbph.train(photos, labels);
         f = new File(photosFolder, LBPH_CLASSIFIER);
         f.createNewFile();
         lbph.save(f.getAbsolutePath());

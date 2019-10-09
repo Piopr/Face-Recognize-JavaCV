@@ -187,7 +187,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
                      * wczytanie wzorca do detekcji twarzy
                      */
                     faceDetector = RecognizeHelper.loadClassifierCascade(RecognizeActivity.this, R.raw.frontalface);
-                    //Wczytanie z plikow (jesli istnieja), plikow z wytrenowanymi algorytmami.
+                    //Wczytanie z plikow (jesli istnieja) z wytrenowanymi algorytmami.
                     //Wymagane 3 lub 2 (w przypadku, gdy tylko 1 zestaw zdjec nie mozna wytrenowac FisherFaces)
                     if (RecognizeHelper.isTrained(getBaseContext())) {
                         File folder = new File(savePath, RecognizeHelper.TRAIN_FOLDER);
@@ -460,26 +460,22 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
         DoublePointer reliability = new DoublePointer(1);
         faceEigen.predict(detectedFace, label, reliability);
         int prediction = label.get(0);
-
-
-        //sprawdzanie zawartosci zmiennej label
-        //Log.d("Piopr", "label.get(0): " + label.get(0));
         double acceptanceLevel = reliability.get(0);
 
-        String name;
+        String infoString;
         if (prediction == -1 || acceptanceLevel >= ACCEPT_LEVEL) {
-            name = getString(R.string.unknown);
+            infoString = getString(R.string.unknown);
         } else {
-            name = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
+            infoString = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
         }
         int x = Math.max(rectFace.tl().x() - 10, 0);
         int y = Math.max(rectFace.tl().y() - 10, 0);
 
         if (CURRENT_IDUSER == prediction && acceptanceLevel < ACCEPT_LEVEL) {
-            putText(rgbaMat, name, new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0, 255, 0, 0));
+            putText(rgbaMat, infoString, new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0, 255, 0, 0));
 
         } else {
-            putText(rgbaMat, name, new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255, 0, 0, 0));
+            putText(rgbaMat, infoString, new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255, 0, 0, 0));
         }
 
 
@@ -493,14 +489,14 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
             acceptanceLevel = reliability.get(0);
 
             if (prediction == -1 || acceptanceLevel >= ACCEPT_LEVEL) {
-                name = getString(R.string.unknown);
+                infoString = getString(R.string.unknown);
             } else {
-                name = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
+                infoString = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
             }
             if (CURRENT_IDUSER == prediction && acceptanceLevel <= ACCEPT_LEVEL) {
-                putText(rgbaMat, name, new Point(x, y - 20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0, 255, 0, 0));
+                putText(rgbaMat, infoString, new Point(x, y - 20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0, 255, 0, 0));
             } else {
-                putText(rgbaMat, name, new Point(x, y - 20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255, 0, 0, 0));
+                putText(rgbaMat, infoString, new Point(x, y - 20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255, 0, 0, 0));
             }
         } else {
             putText(rgbaMat, "Alg. Fisher niewytrenowany.", new Point(x, y - 20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255, 0, 0, 0));
@@ -517,16 +513,16 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
         acceptanceLevel = reliability.get(0);
 
         if (prediction == -1 || acceptanceLevel >= ACCEPT_LEVEL_LBPH) {
-            name = getString(R.string.unknown);
+            infoString = getString(R.string.unknown);
             verified = false;
         } else {
-            name = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
+            infoString = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
         }
         if (CURRENT_IDUSER == prediction && acceptanceLevel < ACCEPT_LEVEL_LBPH) {
-            putText(rgbaMat, name, new Point(x, y - 40), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0, 255, 0, 0));
+            putText(rgbaMat, infoString, new Point(x, y - 40), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0, 255, 0, 0));
             verified = true;
         } else {
-            putText(rgbaMat, name, new Point(x, y - 40), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255, 0, 0, 0));
+            putText(rgbaMat, infoString, new Point(x, y - 40), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255, 0, 0, 0));
             verified = false;
         }
     }
