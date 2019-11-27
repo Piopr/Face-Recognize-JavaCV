@@ -19,6 +19,7 @@ App allows to:
  * Recognizing from camera
  * Recognizing from photos
  * Visualisation of Eigen faces in all steps of training
+ * Time comparing of all algorithms
 
 Gradle (inside the `build.gradle` file):
 -----------------------------------------
