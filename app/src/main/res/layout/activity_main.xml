@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:clickable="false"
-        android:text="Rozpoznaj twarz" />
+        android:text="@string/btnOpenCv" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,14 +29,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight=".50"
-            android:text="Dodaj" />
+            android:text="@string/btnAdd" />
 
         <Button
             android:id="@+id/usun"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight=".50"
-            android:text="Usun" />
+            android:text="@string/btnDelete" />
     </LinearLayout>
 
 
@@ -78,7 +78,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:enabled="false"
-        android:text="Pomoc"
+        android:text="@string/btnHelp"
         android:visibility="visible" />
 
 </LinearLayout>

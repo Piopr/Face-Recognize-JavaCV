@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--- Main activity -->
+    <string name="btnOpenCv">Recognize</string>
+    <string name="btnAdd">Add</string>
+    <string name="btnDelete">Delete</string>
+    <string name="btnHelp">Help</string>
+
+    <!--- Recognize activity -->
+
+    <string name="btnTrain">Train</string>
+    <string name="btnPrepare">Rename</string>
+    <string name="btnTest">Test</string>
+    <string name="btnDetect">Det. photo</string>
+    <string name="btnFromPhoto">Recog. photo</string>
+    <string name="btnMean">Mean f.</string>
+    <string name="btnPhoto">Take photo</string>
+    <string name="btnReset">Reset</string>
+    <string name="btnHelp2">\?</string>
+
+
+
+</resources>

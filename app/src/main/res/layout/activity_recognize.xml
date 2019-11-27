@@ -19,12 +19,12 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|left"
         android:enabled="false"
-        android:text="Trening" />
+        android:text="@string/btnTrain" />
     <Button
         android:id="@+id/btPrzygotuj"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nazwij"
+        android:text="@string/btnPrepare"
         android:enabled="false"
         android:layout_gravity="bottom|left"
         android:layout_marginBottom="50dp"
@@ -33,7 +33,7 @@
         android:id="@+id/btTesting"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Testuj"
+        android:text="@string/btnTest"
         android:enabled="false"
         android:layout_gravity="bottom|left"
         android:layout_marginBottom="100dp"
@@ -44,7 +44,7 @@
         android:id="@+id/btDetect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Przetwórz"
+        android:text="@string/btnDetect"
         android:enabled="false"
         android:layout_gravity="bottom|right"
         android:layout_marginBottom="50dp"
@@ -54,7 +54,7 @@
         android:id="@+id/btZeZdjecia"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ze zdjecia"
+        android:text="@string/btnFromPhoto"
         android:enabled="false"
         android:layout_gravity="bottom|right"
         android:layout_marginBottom="100dp"
@@ -64,7 +64,7 @@
         android:id="@+id/btMean"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Wizual."
+        android:text="@string/btnMean"
         android:enabled="false"
         android:layout_gravity="bottom|right"
         android:layout_marginBottom="150dp"
@@ -77,7 +77,7 @@
         android:id="@+id/btPhoto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Zrob zdjecie"
+        android:text="@string/btnPhoto"
         android:enabled="false"
         android:layout_gravity="bottom|center_horizontal"/>
 
@@ -85,7 +85,7 @@
         android:id="@+id/btReset"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Reset"
+        android:text="@string/btnReset"
         android:enabled="false"
         android:layout_gravity="bottom|right"
         />
@@ -94,7 +94,7 @@
     android:id="@+id/btHelp"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="\?"
+    android:text="@string/btnHelp2"
     android:layout_gravity="top|left"/>
 
 
