@@ -29,3 +29,9 @@ Gradle (inside the `build.gradle` file):
     implementation group: 'org.bytedeco.javacpp-presets', name: 'ffmpeg', version: '4.0.2-1.4.3', classifier: 'android-arm'
     implementation group: 'org.bytedeco.javacpp-presets', name: 'ffmpeg', version: '4.0.2-1.4.3', classifier: 'android-x86'
 ```
+
+Requirements:
+-----------------------------------------
+ * min. Android 4.1 or upper
+ * Camera 
+
