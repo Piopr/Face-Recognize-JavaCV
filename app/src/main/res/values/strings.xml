@@ -1,29 +1,31 @@
 <resources>
-    <string name="app_name">Rozpoznawanie twarzy</string>
-    <string name="permission_warning">Aby kontynuowac, prosze wlaczyc uprawnienia kamery oraz uzywanie pamieci zewnetrznej.</string>
-    <string name="dismiss">Usunieto</string>
-    <string name="unknown">Nieznany uzytkownik</string>
-    <string name="help_message"><b>Dodaj</b> - dodaje nowego uzytkownika.\n
-    <b>Usuń</b> - usuwa wybranego uzytkownika oraz jego dane \n
-    <b>Rozpoznaj twarz</b> -  po wybraniu uzytkownika przechodzi do kolejnego interfejsu, w którym nastąpi rozpoznawanie twarzy.</string>
-    <string name="help_recognize_message">
-        <b>Jak wykonywać zdjęcia?</b>\n
-        Jeśli wykonujesz zdjęcie w ramach aplikacji upewnij się, że Twoja twarz znajduje się w prostokącie.\n
-        <b>Istotne rzeczy:</b> \n
-        <b>światło - </b> upewnij się, że Twoja twarz jest jednakowo oświetlona. Unikaj sytuacji, gdzie twarz jest słabo widoczna, lub jej część nie jest oświetlona.\n
-        <b>tło - </b> postaraj się, aby tło na którym się znajdujesz było jednolite (np. ściana w kolorze białym).\n
-        <b>ułożenie twarzy - </b> twarz powinna być w pozycji pionowej (oczy powinny znajdować się w jednej, poziomej linii).\n
-        <b>Ilość zdjęć - </b> ilość zdjęć w ramach jednego użytkownika powinna wynosić przynajmniej 8.\n
-        <b> Niezastosowanie do któregoś z kryterium może utrudnić rozpoznawanie!</b>\n\n
+    <string name="app_name">Face Recognize</string>
+    <string name="permission_warning">For use you need camera and storage permission.</string>
+    <string name="dismiss">Deleted</string>
+    <string name="unknown">Unknown user</string>
 
-        <b> Interfejs</b>\n
-       <b>Zrob zdjecie</b> - Wykonuje zdjecie gotowe do treningu. W miarę możliwości zdjęcie wykonuj na jednolitym tle.\n
-        <b>Trening</b> - Traning algorytmów. (przy własnym zbiorze zdjęć wykonaj najpierw <b>nazwij</b> a potem <b>przetwórz</b>\n
-        <b>Reset</b> - restartuje wytrenowane algorytmy.\n
-        <b>Nazwij</b> - zmienia nazwy plików odpowiednio do wzorca person.id.nr_zdjecia\n
-        <b>Przetwórz</b> - wykrywa twarze na zbiorze zdjęć w folderze aktualnego użytkownika.\n
-        <b>Ze zdjęcia</b> - rozpoznaje osobę ze zdjęcia w folderze default na wytrenowanych algorytmach.\n
-        <b>Wizual.</b> - wykonuje wizualizację z wybranych algorytmów rozpoznawania twarzy dostępne w <b>user/visualizations</b>.\n
-        <b>Testuj</b> - wykonuje test rozpoznania na wszystkich zbiorach zdjęć. Wyniki w plikach .csv w głównym folderze.
+    <string name="help_message"><b>Add</b> - adding new user (string name in text field needed.\n
+    <b>Delete</b> - deletes the selected user.  \n
+    <b>Recognize</b> -  switch to recognize activity.
+    </string>
+    <string name="help_recognize_message">
+        <b>How to take a correct photo</b>\n
+        Be sure that your face is in the square (correctly detected).\n
+        <b>Important things:</b> \n
+        <b>light - </b> make sure your face is evenly lit. Avoid situations where the face is difficult to see or only part of your face is lit.\n
+        <b>background - </b> your background should be uniform.\n
+        <b>face position - </b> the face should be in a vertical position (eyes should be in one horizontal line).\n
+        <b>number of photos - </b> for good results number of photos should be higher than 7.\n
+        <b> Not following the rules might affect bad results!</b>\n\n
+
+        <b>Interface</b>\n
+       <b>Take photo</b> - Take photo ready to train.\n
+        <b>Train</b> - Algorithms training. (with your own dataset first click <b>rename</b> and then <b>det. photo</b>\n
+        <b>Reset</b> - reset of trained algorithms.\n
+        <b>Rename</b> - changing a photo names to pattern person.id.photo_number.jpg\n
+        <b>Det. Photo</b> - detect faces on dataset of current user and resize to correct resolution..\n
+        <b>Recog. photo</b> - recognize user from photo of current user in folder <i>default</i>.\n
+        <b>Mean</b> - performs visualization of selected face recognition algorithms available in <b> user/visualizations </b>.\n
+        <b>Test</b> - performs a recognition test on all photo sets. Results in .csv files in the main folder.
     </string>
 </resources>

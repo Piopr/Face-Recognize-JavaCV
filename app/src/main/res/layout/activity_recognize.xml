@@ -13,13 +13,7 @@
         app:camera_type="front"
         app:scale_type="full" />
 
-    <Button
-        android:id="@+id/btTrain"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|left"
-        android:enabled="false"
-        android:text="@string/btnTrain" />
+
     <Button
         android:id="@+id/btPrzygotuj"
         android:layout_width="wrap_content"
@@ -40,38 +34,61 @@
         />
 
 
-    <Button
-        android:id="@+id/btDetect"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btnDetect"
-        android:enabled="false"
-        android:layout_gravity="bottom|right"
-        android:layout_marginBottom="50dp"
-        />
 
-    <Button
-        android:id="@+id/btZeZdjecia"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/btnFromPhoto"
-        android:enabled="false"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:layout_gravity="bottom|right"
-        android:layout_marginBottom="100dp"
-        />
+        android:orientation="vertical">
+    <!--        android:layout_marginBottom="50dp"-->
 
     <Button
         android:id="@+id/btMean"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/btnMean"
+        android:enabled="false"/>
+<!--        android:layout_marginBottom="150dp"-->
+
+    <Button
+        android:id="@+id/btZeZdjecia"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btnFromPhoto"
         android:enabled="false"
-        android:layout_gravity="bottom|right"
-        android:layout_marginBottom="150dp"
-        />
+        android:layout_gravity="bottom|right"/>
+<!--        android:layout_marginBottom="100dp"-->
+
+    <Button
+        android:id="@+id/btDetect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btnDetect"
+        android:enabled="false"
+        android:layout_gravity="bottom|right"/>
+<!--        android:layout_marginBottom="50dp"-->
+
+
+        <Button
+            android:id="@+id/btReset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btnReset"
+            android:enabled="false"
+            android:layout_gravity="bottom|right" />
+    </LinearLayout>
 
 
 
+    <Button
+        android:id="@+id/btTrain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|left"
+        android:enabled="false"
+        android:text="@string/btnTrain" />
 
     <Button
         android:id="@+id/btPhoto"
@@ -81,21 +98,14 @@
         android:enabled="false"
         android:layout_gravity="bottom|center_horizontal"/>
 
-    <Button
-        android:id="@+id/btReset"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btnReset"
-        android:enabled="false"
-        android:layout_gravity="bottom|right"
-        />
+
 
     <Button
-    android:id="@+id/btHelp"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="@string/btnHelp2"
-    android:layout_gravity="top|left"/>
+        android:id="@+id/btHelp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btnHelp2"
+        android:layout_gravity="top|left"/>
 
 
     <ProgressBar
