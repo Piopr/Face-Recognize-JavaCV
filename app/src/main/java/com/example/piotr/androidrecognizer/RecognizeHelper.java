@@ -145,7 +145,7 @@ public class RecognizeHelper {
 
                 return train != null && train.length >= 2;
             } else {
-                Toast.makeText(context, "Algorytmy niewytrenowane.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Not trained.", Toast.LENGTH_SHORT).show();
                 return false;
             }
 
@@ -539,7 +539,7 @@ public class RecognizeHelper {
 
         File[] allPhotos = RecognizeHelper.listPhotos();
         if (allPhotos.length == 0 || allPhotos == null) {
-            Toast.makeText(context, "Brak zdjec do przetworzenia", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "No images to process", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -580,7 +580,7 @@ public class RecognizeHelper {
                 }
             }
         }
-        Toast.makeText(context, "Wykryto twarze na zdjeciach.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "Faces detected on photos.", Toast.LENGTH_SHORT).show();
         renamePhotos();
     }
 
@@ -593,7 +593,7 @@ public class RecognizeHelper {
      * @param personDirName - aktualny folder uzytkownika
      */
     public static void recognizeFromPhoto(Context context, String personDirName) throws Exception {
-        Toast.makeText(context, "Sprawdzanie...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "Recognizing...", Toast.LENGTH_SHORT).show();
 
         IS_TRAINED = false;
 
@@ -605,7 +605,7 @@ public class RecognizeHelper {
 
 
         if (!currentFolder.isDirectory() || !currentFolder.exists()) {
-            Toast.makeText(context, "Folder default nie istnieje", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Folder default not exists", Toast.LENGTH_SHORT).show();
             currentFolder.mkdir();
             if (isTrained(context)) {
                 IS_TRAINED = true;
@@ -619,7 +619,7 @@ public class RecognizeHelper {
             }
         });
         if (photosList.length == 0 || photosList == null) {
-            Toast.makeText(context, "Brak zdjęcia do rozpoznania", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "No photo to recognize.", Toast.LENGTH_SHORT).show();
             if (isTrained(context)) {
                 IS_TRAINED = true;
             }
@@ -659,7 +659,7 @@ public class RecognizeHelper {
                     resize(detectedFace, detectedFace, new Size(IMG_SIZE, IMG_SIZE));
                     imwrite(currentFolder + "/zzzdefault.jpg", detectedFace);
                     if (detectedFace.total() == 0) {
-                        Toast.makeText(context, "Nie wykryto twarzy na zdjęciu", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Faces not detected on photos.", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -672,7 +672,7 @@ public class RecognizeHelper {
 
 
         if (!isTrained(context) && detectedFace.total() != 0) {
-            Toast.makeText(context, "Algorytm niewytrenowany", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Algorithm not trained", Toast.LENGTH_SHORT).show();
             return;
         }
         File trainfolder = new File(savePath + TRAIN_FOLDER);
@@ -694,10 +694,10 @@ public class RecognizeHelper {
             int prediction = label.get(0);
             double acceptanceLevel = reliability.get(0);
             if (prediction == -1 || acceptanceLevel >= accLvl) {
-                eigenText = "Nierozpoznano.\n";
+                eigenText = "Not recognized.\n";
 
             } else {
-                eigenText = "Witaj " + usersNamesArray[prediction] + "! " +
+                eigenText = "Welcome " + usersNamesArray[prediction] + "! " +
                         acceptanceLevel + "id: " +
                         prediction + "\n";
             }
@@ -714,10 +714,10 @@ public class RecognizeHelper {
             int prediction = label.get(0);
             double acceptanceLevel = reliability.get(0);
             if (prediction == -1 || acceptanceLevel >= accLvl) {
-                fisherText = "Nierozpoznano.\n";
+                fisherText = "Not recognized.\n";
 
             } else {
-                fisherText = "Witaj " + usersNamesArray[prediction] + "! " +
+                fisherText = "Welcome " + usersNamesArray[prediction] + "! " +
                         cvRound(acceptanceLevel) + "id: " +
                         prediction + "\n";
             }
@@ -732,10 +732,10 @@ public class RecognizeHelper {
             int prediction = label.get(0);
             double acceptanceLevel = reliability.get(0);
             if (prediction == -1 || acceptanceLevel >= accLvl) {
-                lbphText = "Nierozpoznano.\n";
+                lbphText = "Not recognized.\n";
 
             } else {
-                lbphText = "Witaj " + usersNamesArray[prediction] + "! " +
+                lbphText = "Welcome " + usersNamesArray[prediction] + "! " +
                         cvRound(acceptanceLevel) + "id: " +
                         prediction + "\n";
                 VERIFIED = CURRENT_IDUSER == prediction;
@@ -784,7 +784,7 @@ public class RecognizeHelper {
         };
         File[] folderList = mainFolder.listFiles(directoryFilter);
         if (folderList.length == 0) {
-            Toast.makeText(context, "Brak stworzonych uzytkownikow.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Users not created.", Toast.LENGTH_SHORT).show();
             return;
         }
         File eigenFile = new File(mainFolder, EIGEN_FACES_CLASSIFIER);
@@ -851,7 +851,7 @@ public class RecognizeHelper {
             int currentId = Integer.parseInt(currentFolder.getName().replaceAll("[^0-9]", ""));
             File defaultFolder = new File(currentFolder, "default");
             if (!defaultFolder.exists()) {
-                Toast.makeText(context, "Folder default nie istnieje", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Default folder not exists", Toast.LENGTH_SHORT).show();
                 defaultFolder.mkdir();
             }
             File[] photosList = defaultFolder.listFiles(photosFilter);

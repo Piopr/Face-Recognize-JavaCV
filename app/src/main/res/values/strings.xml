@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Face Recognize</string>
     <string name="permission_warning">For use you need camera and storage permission.</string>
-    <string name="dismiss">Deleted</string>
+    <string name="dismiss">OK</string>
     <string name="unknown">Unknown user</string>
 
     <string name="help_message"><b>Add</b> - adding new user (string name in text field needed.\n

@@ -207,7 +207,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
 
 
                     } else {
-                        Toast.makeText(getBaseContext(), "Algorytmy niewytrenowane.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getBaseContext(), "Not trained.", Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
                     Log.d(TAG, e.getLocalizedMessage(), e);
@@ -262,7 +262,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
                     public void onClick(View v) {
                         try {
                             RecognizeHelper.reset(getBaseContext());
-                            Toast.makeText(getBaseContext(), "Zresetowano algorytm.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getBaseContext(), "Reseted.", Toast.LENGTH_SHORT).show();
                             finish();
                         } catch (Exception e) {
                             Log.d(TAG, e.getLocalizedMessage(), e);
@@ -317,7 +317,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
                 if (isTrained(getBaseContext())) {
 
                     if (!checkFisherExists()) {
-                        Toast.makeText(getBaseContext(), "Aby wytrenować algorytm Fisherfaces potrzeba przynajmniej dwóch zestawow zdjec", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getBaseContext(), "To train Fisherfaces you need 2 datasets at least.", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -371,11 +371,11 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
     void train() {
         //int remainigPhotos = TrainHelper.PHOTOS_TRAIN_QTY - TrainHelper.qtdPhotos(getBaseContext());
         if (RecognizeHelper.isTrained(getBaseContext())) {
-            Toast.makeText(getBaseContext(), "Algorytm juz wytrenowany.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getBaseContext(), "Already trained.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Toast.makeText(getBaseContext(), "Rozpoczęto trening. \n Czekaj... ", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getBaseContext(), "Training started. \n Please wait... ", Toast.LENGTH_SHORT).show();
         new AsyncTask<Void, Void, Void>() {
 
             @Override
@@ -394,7 +394,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
                 try {
-                    Toast.makeText(getBaseContext(), "Koniec treningu. Status: " + RecognizeHelper.isTrained(getBaseContext()), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), "Training ended. Status: " + RecognizeHelper.isTrained(getBaseContext()), Toast.LENGTH_SHORT).show();
                     finish();
                 } catch (Exception e) {
                     Log.d(TAG, e.getLocalizedMessage(), e);
@@ -466,7 +466,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
         if (prediction == -1 || acceptanceLevel >= ACCEPT_LEVEL) {
             infoString = getString(R.string.unknown);
         } else {
-            infoString = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
+            infoString = "Welcome " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
         }
         int x = Math.max(rectFace.tl().x() - 10, 0);
         int y = Math.max(rectFace.tl().y() - 10, 0);
@@ -491,7 +491,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
             if (prediction == -1 || acceptanceLevel >= ACCEPT_LEVEL) {
                 infoString = getString(R.string.unknown);
             } else {
-                infoString = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
+                infoString = "Welcome " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
             }
             if (CURRENT_IDUSER == prediction && acceptanceLevel <= ACCEPT_LEVEL) {
                 putText(rgbaMat, infoString, new Point(x, y - 20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0, 255, 0, 0));
@@ -499,7 +499,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
                 putText(rgbaMat, infoString, new Point(x, y - 20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255, 0, 0, 0));
             }
         } else {
-            putText(rgbaMat, "Alg. Fisher niewytrenowany.", new Point(x, y - 20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255, 0, 0, 0));
+            putText(rgbaMat, "Fisher not trained.", new Point(x, y - 20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255, 0, 0, 0));
 
         }
 
@@ -516,7 +516,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
             infoString = getString(R.string.unknown);
             verified = false;
         } else {
-            infoString = "Witaj " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
+            infoString = "Welcome " + usersNamesArray[prediction] + "! - " + cvRound(acceptanceLevel) + " id: " + prediction;
         }
         if (CURRENT_IDUSER == prediction && acceptanceLevel < ACCEPT_LEVEL_LBPH) {
             putText(rgbaMat, infoString, new Point(x, y - 40), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(0, 255, 0, 0));
@@ -547,8 +547,8 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
     void noTrainedLabel(opencv_core.Rect face, Mat rgbaMat) {
         int x = Math.max(face.tl().x() - 10, 0);
         int y = Math.max(face.tl().y() - 10, 0);
-        putText(rgbaMat, "Algorytm niewytrenowany", new Point(x, y-20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255,0,0,0));
-        putText(rgbaMat, "lub niezaladowany.", new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255,0,0,0));
+        putText(rgbaMat, "Not trained", new Point(x, y-20), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255,0,0,0));
+        putText(rgbaMat, "or not loaded.", new Point(x, y), FONT_HERSHEY_PLAIN, 1.4, new opencv_core.Scalar(255,0,0,0));
     }
 
     /***
@@ -605,7 +605,7 @@ public class RecognizeActivity extends Activity implements CameraPreview.CvCamer
             @Override
             public void run() {
                 //int remainigPhotos = TrainHelper.qtdPhotos(getBaseContext());
-                Toast.makeText(getBaseContext(), "Zdjecie nr: " + RecognizeHelper.qtdPhotosNew(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), "Photo #" + RecognizeHelper.qtdPhotosNew(), Toast.LENGTH_SHORT).show();
             }
         });
     }

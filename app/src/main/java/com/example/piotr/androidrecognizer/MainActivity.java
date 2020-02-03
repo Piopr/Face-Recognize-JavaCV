@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if(usersRG.getCheckedRadioButtonId()==-1){
-                    Toast.makeText(getBaseContext(), "Nie wybrano uzytkownika lub juz nie istnieje.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getBaseContext(), "User not chosen or no exists.", Toast.LENGTH_LONG).show();
 
                 } else {
                     RadioButton selected = (RadioButton) findViewById(usersRG.getCheckedRadioButtonId());
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
                 EditText userEditText = findViewById(R.id.nazwa);
                 String nameOfUser = userEditText.getText().toString().toLowerCase();
                 if(nameOfUser.isEmpty()){
-                    Toast.makeText(getBaseContext(), "Puste pole tekstowe.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getBaseContext(), "Empty text field.", Toast.LENGTH_LONG).show();
                 } else {
                     //Toast.makeText(getBaseContext(), nameOfUser, Toast.LENGTH_LONG).show();
                     makeNewUser(nameOfUser);
@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if(usersRG.getCheckedRadioButtonId()==-1){
-                    Toast.makeText(getBaseContext(), "Nie wybrano uzytkownika lub juz nie istnieje.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getBaseContext(), "User not chosen or no exists.", Toast.LENGTH_LONG).show();
                     makeListOfUsers();
                 } else {
                     RadioButton selected = findViewById(usersRG.getCheckedRadioButtonId());
@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
         //sprawdzanie, czy uzytkownik istnieje
         if(Arrays.asList(users).contains(username)){
             Log.d("Piopr", "Podany uzytkownik istnieje");
-            Toast.makeText(getBaseContext(), "Podany uzytkownik istnieje", Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), "User already exists.", Toast.LENGTH_LONG).show();
         } else {
 
             //szukanie max id dla poprawnego nadawania id uzytkownikom
