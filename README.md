@@ -12,15 +12,15 @@ Used recognize algorithms:
  
  Screenshots:
 -----------------------------------------
- <details>
- <summary>Main menu screenshot and details</summary>
+
+Main menu screenshot and details
     
 ![mainmenu](https://user-images.githubusercontent.com/32546106/73701894-4cebc480-46eb-11ea-83e4-cbde73d48d84.png)
 
-</details>
 
-<details>
- <summary>Recognize activity and details:</summary>
+
+
+Recognize activity and details:
 Before training: 
     
 ![beforetraining](https://user-images.githubusercontent.com/32546106/73701898-4e1cf180-46eb-11ea-84fb-d8fd780123b9.png)
@@ -29,7 +29,7 @@ After training:
 
 ![aftertraining](https://user-images.githubusercontent.com/32546106/73701900-4f4e1e80-46eb-11ea-9513-d8cbe0dd09df.png)
 
-</details>
+
 
 App allows to:
 --------------
