@@ -34,4 +34,11 @@ Requirements:
 -----------------------------------------
  * min. Android 4.1 or upper
  * Camera 
+ 
+ Screenshots:
+ ----------------------------------------
+ Main menu:
+ <details>
+![Screenshot_2020-02-04-00-15-51](https://user-images.githubusercontent.com/32546106/73701578-4ad53600-46ea-11ea-851e-e9a9ce196308.png)
+ </details>
 
