@@ -78,6 +78,11 @@ Gradle (inside the `build.gradle` file):
     implementation group: 'org.bytedeco.javacpp-presets', name: 'ffmpeg', version: '4.0.2-1.4.3', classifier: 'android-x86'
 ```
 
+Download:
+--------------
+
+<a href="https://github.com/Piopr/Face-Recognize-JavaCV/releases/download/FaceRecognizePiopr1.0/FaceRecognizePiopr.apk">FaceRecognize1.0.apk</a>
+
 Requirements:
 -----------------------------------------
  * min. Android 4.1 or upper
