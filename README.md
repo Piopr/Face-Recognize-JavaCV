@@ -18,7 +18,7 @@ Main menu screenshot and details
 ![mainmenu](https://user-images.githubusercontent.com/32546106/73701894-4cebc480-46eb-11ea-83e4-cbde73d48d84.png)
 
 <details>
-   <summary>Details</summary>
+   <summary>Details (spoiler)</summary>
  <b>Add</b> - adding new user (string name in text field needed.</br>
     <b>Delete</b> - deletes the selected user.  </br>
     <b>Recognize</b> -  switch to recognize activity.
@@ -36,7 +36,7 @@ After training:
 ![aftertraining](https://user-images.githubusercontent.com/32546106/73701900-4f4e1e80-46eb-11ea-9513-d8cbe0dd09df.png)
 
 <details>
- <summary>Details</summary>
+ <summary>Details (spoiler)</summary>
  <b>How to take a correct photo</b></br>
         Be sure that your face is in the square (correctly detected).</br>
         <b>Important things:</b> </br>
