@@ -20,17 +20,20 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import android.os.Build;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
@@ -38,11 +41,17 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import org.bytedeco.javacpp.opencv_core.Mat;
+import org.bytedeco.javacpp.opencv_imgcodecs;
+import org.bytedeco.javacpp.opencv_imgproc;
 import org.bytedeco.javacv.AndroidFrameConverter;
 import org.bytedeco.javacv.FFmpegFrameFilter;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameFilter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.opencv.android.Utils;
+import org.opencv.highgui.HighGui;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -895,8 +904,15 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
         if (listener != null) {
             Mat mat = converterToMat.convert(frame);
-            processedMat = listener.onCameraFrame(mat);
-            frame = converterToMat.convert(processedMat);
+
+            Mat tmpProcessedMat = new Mat();
+
+            tmpProcessedMat = opencv_imgcodecs.imread("/mnt/sdcard/train_folder/" + "arnold.jpg");
+            //opencv_imgproc.cvtColor(tmpProcessedMat, tmpProcessedMat, Imgproc.COLOR_RGB2BGRA);
+            processedMat = listener.onCameraFrame(tmpProcessedMat);
+            //processedMat = tmpProcessedMat;
+            frame = converterToMat.convert(tmpProcessedMat);
+            //frame = tmpProcessedMat;
             if (mat != null) {
                 mat.release();
             }
@@ -919,9 +935,13 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             }
         }
 
+
+
         if (processedMat != null) {
             processedMat.release();
         }
+
+
     }
 
     public interface CvCameraViewListener {
