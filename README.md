@@ -85,8 +85,8 @@ Download:
 
 Requirements:
 -----------------------------------------
- * min. Android 4.1 or upper
- * Camera 
+ * min. Android 4.1 or higher
+ * camera device 
  
 
     
